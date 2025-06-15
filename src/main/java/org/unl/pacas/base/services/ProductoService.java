@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.unl.pacas.base.dao.ProductoRepository;
-import org.unl.pacas.base.dao_models.Producto;
+import org.unl.pacas.base.models.Producto;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -87,13 +87,13 @@ public class ProductoService {
     }
 
     public Double getValorInventarioCompra() {
-        Double valor = productoRepository.calcularValorInventarioCompra();
-        return valor != null ? valor : 0.0;
+        java.math.BigDecimal valor = productoRepository.calcularValorInventarioCompra();
+        return valor != null ? valor.doubleValue() : 0.0;
     }
 
     public Double getValorInventarioVenta() {
-        Double valor = productoRepository.calcularValorInventarioVenta();
-        return valor != null ? valor : 0.0;
+        java.math.BigDecimal valor = productoRepository.calcularValorInventarioVenta();
+        return valor != null ? valor.doubleValue() : 0.0;
     }
 
     public void actualizarStock(Long productoId, Integer nuevaCantidad) {

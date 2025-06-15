@@ -1,32 +1,20 @@
 [
   {
-    "route": "",
+    "route": "cuenta-list",
     "flowLayout": false,
     "params": {},
-    "title": "Layout",
-    "children": [
-      {
-        "route": "",
-        "title": "Inicio",
-        "menu": {
-          "icon": "vaadin:home",
-          "title": "Inicio",
-          "order": 0
-        },
-        "flowLayout": false,
-        "params": {}
-      },
-      {
-        "route": "pacas",
-        "title": "Pacas",
-        "menu": {
-          "icon": "vaadin:package",
-          "order": 1,
-          "title": "Pacas"
-        },
-        "flowLayout": false,
-        "params": {}
-      }
-    ]
+    "title": "Cuenta List"
+  },
+  {
+    "route": "persona-list",
+    "flowLayout": false,
+    "params": {},
+    "title": "Persona List"
+  },
+  {
+    "route": "rol-list",
+    "flowLayout": false,
+    "params": {},
+    "title": "Rol List"
   }
 ]

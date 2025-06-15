@@ -2,8 +2,6 @@ package org.unl.pacas;
 
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.server.PWA;
-import com.vaadin.flow.theme.Theme;
-import com.vaadin.flow.theme.lumo.Lumo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -18,7 +16,6 @@ import java.time.Clock;
 import java.util.Arrays;
 
 @SpringBootApplication
-@Theme(value = "lumo", variant = Lumo.DARK)
 @PWA(name = "Vaadin Pacas", shortName = "Pacas", offlineResources = {"images/logo.png"})
 public class Application extends SpringBootServletInitializer implements AppShellConfigurator {
 
@@ -28,6 +25,20 @@ public class Application extends SpringBootServletInitializer implements AppShel
     public Clock clock() {
         return Clock.systemDefaultZone();
     }
+
+    // OPCIONAL: Bean para poblar datos de prueba al arrancar la app
+    // Descomenta y personaliza si lo necesitas
+    /*
+    @Bean
+    public CommandLineRunner demo() {
+        return (args) -> {
+            // Ejemplo de uso de LinkedList con tu modelo Persona
+            // LinkedList<Persona> personas = new LinkedList<>();
+            // personas.add(new Persona("Juan", "Pérez", "juan@correo.com"));
+            // log.info("Personas de prueba cargadas: " + personas.print());
+        };
+    }
+    */
 
     public static void main(String[] args) {
         SpringApplication app = new SpringApplication(Application.class);
@@ -40,11 +51,8 @@ public class Application extends SpringBootServletInitializer implements AppShel
         if (env.getProperty("server.ssl.key-store") != null) {
             protocol = "https";
         }
-        String serverPort = env.getProperty("server.port");
-        String contextPath = env.getProperty("server.servlet.context-path");
-        if (contextPath == null) {
-            contextPath = "";
-        }
+        String serverPort = env.getProperty("server.port", "8080");
+        String contextPath = env.getProperty("server.servlet.context-path", "");
         String hostAddress = "localhost";
         try {
             hostAddress = InetAddress.getLocalHost().getHostAddress();
@@ -56,7 +64,7 @@ public class Application extends SpringBootServletInitializer implements AppShel
                         "Local: \t\t{}://localhost:{}{}\n\t" +
                         "Externa: \t{}://{}:{}{}\n\t" +
                         "Perfiles(s): \t{}\n----------------------------------------------------------",
-                env.getProperty("spring.application.name"),
+                env.getProperty("spring.application.name", "vaadin-pacas"),
                 protocol,
                 serverPort,
                 contextPath,
@@ -64,7 +72,7 @@ public class Application extends SpringBootServletInitializer implements AppShel
                 hostAddress,
                 serverPort,
                 contextPath,
-                env.getActiveProfiles().length == 0 ? env.getDefaultProfiles() : Arrays.toString(env.getActiveProfiles())
+                env.getActiveProfiles().length == 0 ? Arrays.toString(env.getDefaultProfiles()) : Arrays.toString(env.getActiveProfiles())
         );
     }
 }

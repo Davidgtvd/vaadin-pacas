@@ -1,6 +1,6 @@
-import { html, css, LitElement } from 'lit';
+import { LitElement, html, css } from 'lit';
+import { css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
-import '@vaadin/button';
 import '@vaadin/grid';
 import '@vaadin/grid/vaadin-grid-column.js';
 import '@vaadin/text-field';

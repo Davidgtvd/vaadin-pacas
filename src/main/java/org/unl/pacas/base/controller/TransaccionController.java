@@ -5,9 +5,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.unl.pacas.base.services.TransaccionService;
-import org.unl.pacas.base.dao_models.Transaccion;
-import org.unl.pacas.base.dao_models.TipoTransaccion;
-import org.unl.pacas.base.dao_models.MetodoPago;
+import org.unl.pacas.base.models.Transaccion;
+import org.unl.pacas.base.models.TipoTransaccion;
+import org.unl.pacas.base.models.MetodoPago;
 
 import java.time.LocalDate;
 import java.util.List;

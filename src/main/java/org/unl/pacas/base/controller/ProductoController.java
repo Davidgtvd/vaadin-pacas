@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.unl.pacas.base.services.ProductoService;
-import org.unl.pacas.base.dao_models.Producto;
+import org.unl.pacas.base.models.Producto;
 
 import java.util.List;
 import java.util.Optional;
