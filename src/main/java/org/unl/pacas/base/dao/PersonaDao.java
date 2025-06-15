@@ -1,209 +1,442 @@
-package org.unl.pacas.base.dao.dao_models;
+package org.unl.pacas.base.dao;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.unl.pacas.base.models.Persona;
 import org.unl.pacas.base.models.Sexo;
 import org.unl.pacas.base.models.TipoIdentificacion;
 import org.unl.pacas.base.controller.data_struct.list.LinkedList;
 
-
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface PersonaDao extends JpaRepository<Persona, Long> {
+public class PersonaDao {
 
-    // Búsquedas básicas
-    Optional<Persona> findByEmail(String email);
-    
-    Optional<Persona> findByIdentificacion(String identificacion);
-    
-    boolean existsByEmail(String email);
-    
-    boolean existsByIdentificacion(String identificacion);
+    private final LinkedList<Persona> personas = new LinkedList<>();
 
-    // Búsquedas por nombre
-    List<Persona> findByNombresContainingIgnoreCase(String nombres);
-    
-    List<Persona> findByApellidosContainingIgnoreCase(String apellidos);
-    
-    @Query("SELECT p FROM Persona p WHERE " +
-           "LOWER(p.nombres) LIKE LOWER(CONCAT('%', :nombre, '%')) OR " +
-           "LOWER(p.apellidos) LIKE LOWER(CONCAT('%', :nombre, '%'))")
-    List<Persona> buscarPorNombreCompleto(@Param("nombre") String nombre);
+    public LinkedList<Persona> findAll() {
+        return personas;
+    }
 
-    // Búsquedas por atributos específicos
-    List<Persona> findBySexo(Sexo sexo);
-    
-    List<Persona> findByTipoIdentificacion(TipoIdentificacion tipoIdentificacion);
-    
-    List<Persona> findByTelefonoContaining(String telefono);
-    
-    List<Persona> findByDireccionContainingIgnoreCase(String direccion);
+    public Optional<Persona> findById(Long id) {
+        for (Persona p : personas) {
+            if (p.getId() != null && p.getId().equals(id)) {
+                return Optional.of(p);
+            }
+        }
+        return Optional.empty();
+    }
 
-    // Búsquedas por fecha
-    List<Persona> findByFechaNacimientoBetween(LocalDate fechaInicio, LocalDate fechaFin);
-    
-    @Query("SELECT p FROM Persona p WHERE YEAR(p.fechaNacimiento) = :año")
-    List<Persona> findByAñoNacimiento(@Param("año") int año);
+    public Optional<Persona> findByEmail(String email) {
+        if (email == null) return Optional.empty();
+        for (Persona p : personas) {
+            if (email.equalsIgnoreCase(p.getEmail())) {
+                return Optional.of(p);
+            }
+        }
+        return Optional.empty();
+    }
 
-    // Búsqueda general
-    @Query("SELECT p FROM Persona p WHERE " +
-           "LOWER(p.nombres) LIKE LOWER(CONCAT('%', :texto, '%')) OR " +
-           "LOWER(p.apellidos) LIKE LOWER(CONCAT('%', :texto, '%')) OR " +
-           "LOWER(p.email) LIKE LOWER(CONCAT('%', :texto, '%')) OR " +
-           "LOWER(p.identificacion) LIKE LOWER(CONCAT('%', :texto, '%')) OR " +
-           "LOWER(p.telefono) LIKE LOWER(CONCAT('%', :texto, '%')) OR " +
-           "LOWER(p.direccion) LIKE LOWER(CONCAT('%', :texto, '%'))")
-    List<Persona> buscarPorTexto(@Param("texto") String texto);
+    public Optional<Persona> findByIdentificacion(String identificacion) {
+        if (identificacion == null) return Optional.empty();
+        for (Persona p : personas) {
+            if (identificacion.equalsIgnoreCase(p.getIdentificacion())) {
+                return Optional.of(p);
+            }
+        }
+        return Optional.empty();
+    }
 
-    // Ordenamiento
-    List<Persona> findAllByOrderByNombresAsc();
-    
-    List<Persona> findAllByOrderByApellidosAsc();
-    
-    List<Persona> findAllByOrderByEmailAsc();
-    
-    List<Persona> findAllByOrderByFechaNacimientoDesc();
+    public boolean existsByEmail(String email) {
+        return findByEmail(email).isPresent();
+    }
 
-    // Personas con y sin cuenta
-    @Query("SELECT p FROM Persona p WHERE p.cuenta IS NOT NULL")
-    List<Persona> findPersonasConCuenta();
+    public boolean existsByIdentificacion(String identificacion) {
+        return findByIdentificacion(identificacion).isPresent();
+    }
 
-    @Query("SELECT p FROM Persona p WHERE p.cuenta IS NULL")
-    List<Persona> findPersonasSinCuenta();
+    public List<Persona> findByNombresContainingIgnoreCase(String nombres) {
+        List<Persona> result = new ArrayList<>();
+        if (nombres == null) return result;
+        String lower = nombres.toLowerCase();
+        for (Persona p : personas) {
+            if (p.getNombres() != null && p.getNombres().toLowerCase().contains(lower)) {
+                result.add(p);
+            }
+        }
+        return result;
+    }
 
-    // Estadísticas
-    @Query("SELECT COUNT(p) FROM Persona p WHERE p.sexo = :sexo")
-    Long contarPorSexo(@Param("sexo") Sexo sexo);
+    public List<Persona> findByApellidosContainingIgnoreCase(String apellidos) {
+        List<Persona> result = new ArrayList<>();
+        if (apellidos == null) return result;
+        String lower = apellidos.toLowerCase();
+        for (Persona p : personas) {
+            if (p.getApellidos() != null && p.getApellidos().toLowerCase().contains(lower)) {
+                result.add(p);
+            }
+        }
+        return result;
+    }
 
-    @Query("SELECT COUNT(p) FROM Persona p WHERE p.tipoIdentificacion = :tipo")
-    Long contarPorTipoIdentificacion(@Param("tipo") TipoIdentificacion tipo);
+    public List<Persona> buscarPorNombreCompleto(String nombre) {
+        List<Persona> result = new ArrayList<>();
+        if (nombre == null) return result;
+        String lower = nombre.toLowerCase();
+        for (Persona p : personas) {
+            if ((p.getNombres() != null && p.getNombres().toLowerCase().contains(lower)) ||
+                (p.getApellidos() != null && p.getApellidos().toLowerCase().contains(lower))) {
+                result.add(p);
+            }
+        }
+        return result;
+    }
 
-    @Query("SELECT p.sexo, COUNT(p) FROM Persona p GROUP BY p.sexo")
-    List<Object[]> obtenerEstadisticasPorSexo();
+    public List<Persona> findBySexo(Sexo sexo) {
+        List<Persona> result = new ArrayList<>();
+        if (sexo == null) return result;
+        for (Persona p : personas) {
+            if (sexo.equals(p.getSexo())) {
+                result.add(p);
+            }
+        }
+        return result;
+    }
 
-    @Query("SELECT p.tipoIdentificacion, COUNT(p) FROM Persona p GROUP BY p.tipoIdentificacion")
-    List<Object[]> obtenerEstadisticasPorTipoIdentificacion();
+    public List<Persona> findByTipoIdentificacion(TipoIdentificacion tipoIdentificacion) {
+        List<Persona> result = new ArrayList<>();
+        if (tipoIdentificacion == null) return result;
+        for (Persona p : personas) {
+            if (tipoIdentificacion.equals(p.getTipoIdentificacion())) {
+                result.add(p);
+            }
+        }
+        return result;
+    }
 
-    // Métodos personalizados para LinkedList
-    default LinkedList<Persona> findAllAsLinkedList() {
+    public List<Persona> findByTelefonoContaining(String telefono) {
+        List<Persona> result = new ArrayList<>();
+        if (telefono == null) return result;
+        String lower = telefono.toLowerCase();
+        for (Persona p : personas) {
+            if (p.getTelefono() != null && p.getTelefono().toLowerCase().contains(lower)) {
+                result.add(p);
+            }
+        }
+        return result;
+    }
+
+    public List<Persona> findByDireccionContainingIgnoreCase(String direccion) {
+        List<Persona> result = new ArrayList<>();
+        if (direccion == null) return result;
+        String lower = direccion.toLowerCase();
+        for (Persona p : personas) {
+            if (p.getDireccion() != null && p.getDireccion().toLowerCase().contains(lower)) {
+                result.add(p);
+            }
+        }
+        return result;
+    }
+
+    public List<Persona> findByFechaNacimientoBetween(LocalDate inicio, LocalDate fin) {
+        List<Persona> result = new ArrayList<>();
+        if (inicio == null || fin == null) return result;
+        for (Persona p : personas) {
+            if (p.getFechaNacimiento() != null &&
+                ( !p.getFechaNacimiento().isBefore(inicio) && !p.getFechaNacimiento().isAfter(fin) )) {
+                result.add(p);
+            }
+        }
+        return result;
+    }
+
+    public List<Persona> findByAñoNacimiento(int año) {
+        List<Persona> result = new ArrayList<>();
+        for (Persona p : personas) {
+            if (p.getFechaNacimiento() != null && p.getFechaNacimiento().getYear() == año) {
+                result.add(p);
+            }
+        }
+        return result;
+    }
+
+    public List<Persona> buscarPorTexto(String texto) {
+        List<Persona> result = new ArrayList<>();
+        if (texto == null) return result;
+        String lower = texto.toLowerCase();
+        for (Persona p : personas) {
+            if ((p.getNombres() != null && p.getNombres().toLowerCase().contains(lower)) ||
+                (p.getApellidos() != null && p.getApellidos().toLowerCase().contains(lower)) ||
+                (p.getEmail() != null && p.getEmail().toLowerCase().contains(lower)) ||
+                (p.getIdentificacion() != null && p.getIdentificacion().toLowerCase().contains(lower)) ||
+                (p.getTelefono() != null && p.getTelefono().toLowerCase().contains(lower)) ||
+                (p.getDireccion() != null && p.getDireccion().toLowerCase().contains(lower))) {
+                result.add(p);
+            }
+        }
+        return result;
+    }
+
+    public List<Persona> findAllByOrderByNombresAsc() {
+        List<Persona> list = new ArrayList<>();
+        personas.forEach(list::add);
+        list.sort((p1, p2) -> {
+            if (p1.getNombres() == null) return 1;
+            if (p2.getNombres() == null) return -1;
+            return p1.getNombres().compareToIgnoreCase(p2.getNombres());
+        });
+        return list;
+    }
+
+    public List<Persona> findAllByOrderByApellidosAsc() {
+        List<Persona> list = new ArrayList<>();
+        personas.forEach(list::add);
+        list.sort((p1, p2) -> {
+            if (p1.getApellidos() == null) return 1;
+            if (p2.getApellidos() == null) return -1;
+            return p1.getApellidos().compareToIgnoreCase(p2.getApellidos());
+        });
+        return list;
+    }
+
+    public List<Persona> findAllByOrderByEmailAsc() {
+        List<Persona> list = new ArrayList<>();
+        personas.forEach(list::add);
+        list.sort((p1, p2) -> {
+            if (p1.getEmail() == null) return 1;
+            if (p2.getEmail() == null) return -1;
+            return p1.getEmail().compareToIgnoreCase(p2.getEmail());
+        });
+        return list;
+    }
+
+    public List<Persona> findAllByOrderByFechaNacimientoDesc() {
+        List<Persona> list = new ArrayList<>();
+        personas.forEach(list::add);
+        list.sort((p1, p2) -> {
+            if (p1.getFechaNacimiento() == null && p2.getFechaNacimiento() == null) return 0;
+            if (p1.getFechaNacimiento() == null) return 1;
+            if (p2.getFechaNacimiento() == null) return -1;
+            return p2.getFechaNacimiento().compareTo(p1.getFechaNacimiento());
+        });
+        return list;
+    }
+
+    public List<Persona> findPersonasConCuenta() {
+        List<Persona> result = new ArrayList<>();
+        for (Persona p : personas) {
+            if (p.getCuenta() != null) {
+                result.add(p);
+            }
+        }
+        return result;
+    }
+
+    public List<Persona> findPersonasSinCuenta() {
+        List<Persona> result = new ArrayList<>();
+        for (Persona p : personas) {
+            if (p.getCuenta() == null) {
+                result.add(p);
+            }
+        }
+        return result;
+    }
+
+    public long contarPorSexo(Sexo sexo) {
+        long count = 0;
+        for (Persona p : personas) {
+            if (sexo.equals(p.getSexo())) count++;
+        }
+        return count;
+    }
+
+    public long contarPorTipoIdentificacion(TipoIdentificacion tipo) {
+        long count = 0;
+        for (Persona p : personas) {
+            if (tipo.equals(p.getTipoIdentificacion())) count++;
+        }
+        return count;
+    }
+
+    public long contarTotalPersonas() {
+        return personas.size();
+    }
+
+    public long contarPersonasConCuenta() {
+        long count = 0;
+        for (Persona p : personas) {
+            if (p.getCuenta() != null) count++;
+        }
+        return count;
+    }
+
+    public long contarPersonasSinCuenta() {
+        long count = 0;
+        for (Persona p : personas) {
+            if (p.getCuenta() == null) count++;
+        }
+        return count;
+    }
+
+    public double obtenerEdadPromedio() {
+        int totalEdad = 0;
+        int count = 0;
+        for (Persona p : personas) {
+            if (p.getFechaNacimiento() != null) {
+                int edad = java.time.LocalDate.now().getYear() - p.getFechaNacimiento().getYear();
+                totalEdad += edad;
+                count++;
+            }
+        }
+        return count == 0 ? 0 : (double) totalEdad / count;
+    }
+
+    public Persona save(Persona persona) {
+        if (persona.getId() == null) {
+            long maxId = 0;
+            for (Persona p : personas) {
+                if (p.getId() != null && p.getId() > maxId) {
+                    maxId = p.getId();
+                }
+            }
+            persona.setId(maxId + 1);
+            personas.add(persona);
+        } else {
+            Optional<Persona> existing = findById(persona.getId());
+            if (existing.isPresent()) {
+                Persona p = existing.get();
+                p.setNombres(persona.getNombres());
+                p.setApellidos(persona.getApellidos());
+                p.setEmail(persona.getEmail());
+                p.setIdentificacion(persona.getIdentificacion());
+                p.setSexo(persona.getSexo());
+                p.setTipoIdentificacion(persona.getTipoIdentificacion());
+                p.setTelefono(persona.getTelefono());
+                p.setDireccion(persona.getDireccion());
+                p.setFechaNacimiento(persona.getFechaNacimiento());
+                p.setCuenta(persona.getCuenta());
+            } else {
+                personas.add(persona);
+            }
+        }
+        return persona;
+    }
+
+    public void deleteById(Long id) {
+        personas.removeIf(p -> p.getId() != null && p.getId().equals(id));
+    }
+
+    public boolean existsById(Long id) {
+        return findById(id).isPresent();
+    }
+
+    public boolean esEmailUnico(String email, Long idExcluir) {
+        Optional<Persona> p = findByEmail(email);
+        return p.isEmpty() || (idExcluir != null && p.get().getId().equals(idExcluir));
+    }
+
+    public boolean esIdentificacionUnica(String identificacion, Long idExcluir) {
+        Optional<Persona> p = findByIdentificacion(identificacion);
+        return p.isEmpty() || (idExcluir != null && p.get().getId().equals(idExcluir));
+    }
+
+    public boolean sePuedeEliminar(Long id) {
+        Optional<Persona> p = findById(id);
+        return p.isPresent() && p.get().getCuenta() == null;
+    }
+
+    public List<Persona> buscarConFiltros(String nombres, String apellidos, String email, Sexo sexo, TipoIdentificacion tipoIdentificacion) {
+        List<Persona> result = new ArrayList<>();
+        for (Persona p : personas) {
+            if ((nombres == null || (p.getNombres() != null && p.getNombres().toLowerCase().contains(nombres.toLowerCase()))) &&
+                (apellidos == null || (p.getApellidos() != null && p.getApellidos().toLowerCase().contains(apellidos.toLowerCase()))) &&
+                (email == null || (p.getEmail() != null && p.getEmail().toLowerCase().contains(email.toLowerCase()))) &&
+                (sexo == null || sexo.equals(p.getSexo())) &&
+                (tipoIdentificacion == null || tipoIdentificacion.equals(p.getTipoIdentificacion()))
+            ) {
+                result.add(p);
+            }
+        }
+        return result;
+    }
+
+    // Métodos para LinkedList (añadidos para evitar errores en servicio)
+
+    public LinkedList<Persona> findBySexoAsLinkedList(Sexo sexo) {
+        LinkedList<Persona> result = new LinkedList<>();
+        if (sexo == null) return result;
+        for (Persona p : personas) {
+            if (sexo.equals(p.getSexo())) {
+                result.add(p);
+            }
+        }
+        return result;
+    }
+
+    public LinkedList<Persona> findByTipoIdentificacionAsLinkedList(TipoIdentificacion tipoIdentificacion) {
+        LinkedList<Persona> result = new LinkedList<>();
+        if (tipoIdentificacion == null) return result;
+        for (Persona p : personas) {
+            if (tipoIdentificacion.equals(p.getTipoIdentificacion())) {
+                result.add(p);
+            }
+        }
+        return result;
+    }
+
+    public LinkedList<Persona> buscarPorTextoAsLinkedList(String texto) {
+        LinkedList<Persona> result = new LinkedList<>();
+        if (texto == null) return result;
+        String lower = texto.toLowerCase();
+        for (Persona p : personas) {
+            if ((p.getNombres() != null && p.getNombres().toLowerCase().contains(lower)) ||
+                (p.getApellidos() != null && p.getApellidos().toLowerCase().contains(lower)) ||
+                (p.getEmail() != null && p.getEmail().toLowerCase().contains(lower)) ||
+                (p.getIdentificacion() != null && p.getIdentificacion().toLowerCase().contains(lower))) {
+                result.add(p);
+            }
+        }
+        return result;
+    }
+
+    public LinkedList<Persona> findAllOrderedAsLinkedList(String campo, boolean ascendente) {
+        List<Persona> list = findAllOrdenados(campo, ascendente);
         LinkedList<Persona> linkedList = new LinkedList<>();
-        List<Persona> personas = findAll();
-        for (Persona persona : personas) {
-            linkedList.add(persona);
+        for (Persona p : list) {
+            linkedList.add(p);
         }
         return linkedList;
     }
 
-    default LinkedList<Persona> buscarPorTextoAsLinkedList(String texto) {
-        LinkedList<Persona> linkedList = new LinkedList<>();
-        List<Persona> personas = buscarPorTexto(texto);
-        for (Persona persona : personas) {
-            linkedList.add(persona);
-        }
-        return linkedList;
+    // Nuevo método findAllOrdenados
+    public List<Persona> findAllOrdenados(String campo, boolean ascendente) {
+        List<Persona> list = new ArrayList<>();
+        personas.forEach(list::add);
+        list.sort((p1, p2) -> {
+            int cmp = 0;
+            switch (campo.toLowerCase()) {
+                case "nombres":
+                    cmp = p1.getNombres().compareToIgnoreCase(p2.getNombres());
+                    break;
+                case "apellidos":
+                    cmp = p1.getApellidos().compareToIgnoreCase(p2.getApellidos());
+                    break;
+                case "email":
+                    cmp = p1.getEmail().compareToIgnoreCase(p2.getEmail());
+                    break;
+                case "fechanacimiento":
+                    if (p1.getFechaNacimiento() == null && p2.getFechaNacimiento() == null) cmp = 0;
+                    else if (p1.getFechaNacimiento() == null) cmp = 1;
+                    else if (p2.getFechaNacimiento() == null) cmp = -1;
+                    else cmp = p1.getFechaNacimiento().compareTo(p2.getFechaNacimiento());
+                    break;
+                default:
+                    cmp = 0;
+            }
+            return ascendente ? cmp : -cmp;
+        });
+        return list;
     }
-
-    default LinkedList<Persona> findBySexoAsLinkedList(Sexo sexo) {
-        LinkedList<Persona> linkedList = new LinkedList<>();
-        List<Persona> personas = findBySexo(sexo);
-        for (Persona persona : personas) {
-            linkedList.add(persona);
-        }
-        return linkedList;
-    }
-
-    default LinkedList<Persona> findByTipoIdentificacionAsLinkedList(TipoIdentificacion tipo) {
-        LinkedList<Persona> linkedList = new LinkedList<>();
-        List<Persona> personas = findByTipoIdentificacion(tipo);
-        for (Persona persona : personas) {
-            linkedList.add(persona);
-        }
-        return linkedList;
-    }
-
-    default LinkedList<Persona> findAllOrderedAsLinkedList(String campo, boolean ascendente) {
-        LinkedList<Persona> linkedList = new LinkedList<>();
-        List<Persona> personas;
-        
-        switch (campo.toLowerCase()) {
-            case "nombres":
-                personas = ascendente ? findAllByOrderByNombresAsc() : 
-                          findAll().stream().sorted((p1, p2) -> p2.getNombres().compareTo(p1.getNombres())).toList();
-                break;
-            case "apellidos":
-                personas = ascendente ? findAllByOrderByApellidosAsc() : 
-                          findAll().stream().sorted((p1, p2) -> p2.getApellidos().compareTo(p1.getApellidos())).toList();
-                break;
-            case "email":
-                personas = ascendente ? findAllByOrderByEmailAsc() : 
-                          findAll().stream().sorted((p1, p2) -> p2.getEmail().compareTo(p1.getEmail())).toList();
-                break;
-            case "fechaNacimiento":
-                personas = ascendente ? 
-                          findAll().stream().sorted((p1, p2) -> {
-                              if (p1.getFechaNacimiento() == null && p2.getFechaNacimiento() == null) return 0;
-                              if (p1.getFechaNacimiento() == null) return 1;
-                              if (p2.getFechaNacimiento() == null) return -1;
-                              return p1.getFechaNacimiento().compareTo(p2.getFechaNacimiento());
-                          }).toList() : findAllByOrderByFechaNacimientoDesc();
-                break;
-            default:
-                personas = findAll();
-        }
-        
-        for (Persona persona : personas) {
-            linkedList.add(persona);
-        }
-        return linkedList;
-    }
-
-    // Validaciones para las vistas
-    default boolean esEmailUnico(String email, Long idExcluir) {
-        Optional<Persona> personaExistente = findByEmail(email);
-        return personaExistente.isEmpty() || 
-               (idExcluir != null && personaExistente.get().getId().equals(idExcluir));
-    }
-
-    default boolean esIdentificacionUnica(String identificacion, Long idExcluir) {
-        Optional<Persona> personaExistente = findByIdentificacion(identificacion);
-        return personaExistente.isEmpty() || 
-               (idExcluir != null && personaExistente.get().getId().equals(idExcluir));
-    }
-
-    default boolean sePuedeEliminar(Long id) {
-        Optional<Persona> persona = findById(id);
-        return persona.isPresent() && persona.get().getCuenta() == null;
-    }
-
-    // Búsquedas avanzadas para filtros en vistas
-    @Query("SELECT p FROM Persona p WHERE " +
-           "(:nombres IS NULL OR LOWER(p.nombres) LIKE LOWER(CONCAT('%', :nombres, '%'))) AND " +
-           "(:apellidos IS NULL OR LOWER(p.apellidos) LIKE LOWER(CONCAT('%', :apellidos, '%'))) AND " +
-           "(:email IS NULL OR LOWER(p.email) LIKE LOWER(CONCAT('%', :email, '%'))) AND " +
-           "(:sexo IS NULL OR p.sexo = :sexo) AND " +
-           "(:tipoIdentificacion IS NULL OR p.tipoIdentificacion = :tipoIdentificacion)")
-    List<Persona> buscarConFiltros(@Param("nombres") String nombres,
-                                   @Param("apellidos") String apellidos,
-                                   @Param("email") String email,
-                                   @Param("sexo") Sexo sexo,
-                                   @Param("tipoIdentificacion") TipoIdentificacion tipoIdentificacion);
-
-    // Estadísticas adicionales
-    @Query("SELECT COUNT(p) FROM Persona p")
-    Long contarTotalPersonas();
-
-    @Query("SELECT COUNT(p) FROM Persona p WHERE p.cuenta IS NOT NULL")
-    Long contarPersonasConCuenta();
-
-    @Query("SELECT COUNT(p) FROM Persona p WHERE p.cuenta IS NULL")
-    Long contarPersonasSinCuenta();
-
-    @Query("SELECT AVG(YEAR(CURRENT_DATE) - YEAR(p.fechaNacimiento)) FROM Persona p WHERE p.fechaNacimiento IS NOT NULL")
-    Double obtenerEdadPromedio();
 }

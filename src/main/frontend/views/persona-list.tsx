@@ -1,6 +1,16 @@
 import {
-  Button, ComboBox, Dialog, Grid, GridColumn, GridSortColumn,
-  HorizontalLayout, Icon, Select, TextField, VerticalLayout, DatePicker
+  Button,
+  ComboBox,
+  Dialog,
+  Grid,
+  GridColumn,
+  GridSortColumn,
+  HorizontalLayout,
+  Icon,
+  Select,
+  TextField,
+  VerticalLayout,
+  DatePicker,
 } from '@vaadin/react-components';
 import { Notification } from '@vaadin/react-components/Notification';
 import PersonaServices from 'Frontend/generated/PersonaServices';
@@ -29,7 +39,7 @@ type PersonaEntryFormProps = {
   onPersonaCreated?: () => void;
 };
 
-function PersonaEntryForm(props: PersonaEntryFormProps) {
+function PersonaEntryForm({ onPersonaCreated }: PersonaEntryFormProps) {
   const [dialogOpened, setDialogOpened] = useState(false);
   const [nombres, setNombres] = useState('');
   const [apellidos, setApellidos] = useState('');
@@ -70,10 +80,10 @@ function PersonaEntryForm(props: PersonaEntryFormProps) {
   const createPersona = async () => {
     try {
       if (
-        nombres.trim().length > 0 &&
-        apellidos.trim().length > 0 &&
-        email.trim().length > 0 &&
-        identificacion.trim().length > 0
+        nombres.trim() &&
+        apellidos.trim() &&
+        email.trim() &&
+        identificacion.trim()
       ) {
         await PersonaServices.create(
           nombres.trim(),
@@ -86,19 +96,22 @@ function PersonaEntryForm(props: PersonaEntryFormProps) {
           direccion.trim(),
           fechaNacimiento || null
         );
-        props.onPersonaCreated?.();
+        onPersonaCreated?.();
         close();
         Notification.show('Persona creada exitosamente', {
           duration: 5000,
           position: 'bottom-end',
-          theme: 'success'
+          theme: 'success',
         });
       } else {
-        Notification.show('Los campos nombres, apellidos, email e identificación son obligatorios', {
-          duration: 5000,
-          position: 'top-center',
-          theme: 'error'
-        });
+        Notification.show(
+          'Los campos nombres, apellidos, email e identificación son obligatorios',
+          {
+            duration: 5000,
+            position: 'top-center',
+            theme: 'error',
+          }
+        );
       }
     } catch (error) {
       handleError(error);
@@ -112,43 +125,116 @@ function PersonaEntryForm(props: PersonaEntryFormProps) {
         draggable
         modeless
         opened={dialogOpened}
-        onOpenedChanged={(event) => setDialogOpened(event.detail.value)}
+        onOpenedChanged={(e) => setDialogOpened(e.detail.value)}
         header={
-          <h2 className="draggable" style={{ flex: 1, cursor: 'move', margin: 0, fontSize: '1.5em', fontWeight: 'bold', padding: 'var(--lumo-space-m) 0' }}>
+          <h2
+            className="draggable"
+            style={{
+              flex: 1,
+              cursor: 'move',
+              margin: 0,
+              fontSize: '1.5em',
+              fontWeight: 'bold',
+              padding: 'var(--lumo-space-m) 0',
+            }}
+          >
             Registrar Persona
           </h2>
         }
         footerRenderer={() => (
           <>
             <Button onClick={close}>Cancelar</Button>
-            <Button theme="primary" onClick={createPersona}>Registrar</Button>
+            <Button theme="primary" onClick={createPersona}>
+              Registrar
+            </Button>
           </>
         )}
       >
-        <VerticalLayout theme="spacing" style={{ width: '450px', maxWidth: '100%', alignItems: 'stretch' }}>
+        <VerticalLayout
+          theme="spacing"
+          style={{ width: '450px', maxWidth: '100%', alignItems: 'stretch' }}
+        >
           <HorizontalLayout theme="spacing">
-            <TextField label="Nombres" placeholder="Ingrese los nombres" value={nombres} onValueChanged={(evt) => setNombres(evt.detail.value)} required style={{ flex: 1 }} />
-            <TextField label="Apellidos" placeholder="Ingrese los apellidos" value={apellidos} onValueChanged={(evt) => setApellidos(evt.detail.value)} required style={{ flex: 1 }} />
+            <TextField
+              label="Nombres"
+              placeholder="Ingrese los nombres"
+              value={nombres}
+              onValueChanged={(e) => setNombres(e.detail.value)}
+              required
+              style={{ flex: 1 }}
+            />
+            <TextField
+              label="Apellidos"
+              placeholder="Ingrese los apellidos"
+              value={apellidos}
+              onValueChanged={(e) => setApellidos(e.detail.value)}
+              required
+              style={{ flex: 1 }}
+            />
           </HorizontalLayout>
-          <TextField label="Email" placeholder="ejemplo@correo.com" value={email} onValueChanged={(evt) => setEmail(evt.detail.value)} required />
+          <TextField
+            label="Email"
+            placeholder="ejemplo@correo.com"
+            value={email}
+            onValueChanged={(e) => setEmail(e.detail.value)}
+            required
+          />
           <HorizontalLayout theme="spacing">
-            <ComboBox label="Tipo de Identificación" items={tiposIdentificacion} value={tipoIdentificacion} onValueChanged={(evt) => setTipoIdentificacion(evt.detail.value)} required style={{ flex: 1 }} />
-            <TextField label="Identificación" placeholder="Número de identificación" value={identificacion} onValueChanged={(evt) => setIdentificacion(evt.detail.value)} required style={{ flex: 1 }} />
+            <ComboBox
+              label="Tipo de Identificación"
+              items={tiposIdentificacion}
+              value={tipoIdentificacion}
+              onValueChanged={(e) => setTipoIdentificacion(e.detail.value)}
+              required
+              style={{ flex: 1 }}
+            />
+            <TextField
+              label="Identificación"
+              placeholder="Número de identificación"
+              value={identificacion}
+              onValueChanged={(e) => setIdentificacion(e.detail.value)}
+              required
+              style={{ flex: 1 }}
+            />
           </HorizontalLayout>
           <HorizontalLayout theme="spacing">
-            <ComboBox label="Sexo" items={sexoOptions} value={sexo} onValueChanged={(evt) => setSexo(evt.detail.value)} required style={{ flex: 1 }} />
-            <DatePicker label="Fecha de Nacimiento" value={fechaNacimiento} onValueChanged={(evt) => setFechaNacimiento(evt.detail.value)} style={{ flex: 1 }} />
+            <ComboBox
+              label="Sexo"
+              items={sexoOptions}
+              value={sexo}
+              onValueChanged={(e) => setSexo(e.detail.value)}
+              required
+              style={{ flex: 1 }}
+            />
+            <DatePicker
+              label="Fecha de Nacimiento"
+              value={fechaNacimiento}
+              onValueChanged={(e) => setFechaNacimiento(e.detail.value)}
+              style={{ flex: 1 }}
+            />
           </HorizontalLayout>
-          <TextField label="Teléfono" placeholder="Número de teléfono" value={telefono} onValueChanged={(evt) => setTelefono(evt.detail.value)} />
-          <TextField label="Dirección" placeholder="Dirección completa" value={direccion} onValueChanged={(evt) => setDireccion(evt.detail.value)} />
+          <TextField
+            label="Teléfono"
+            placeholder="Número de teléfono"
+            value={telefono}
+            onValueChanged={(e) => setTelefono(e.detail.value)}
+          />
+          <TextField
+            label="Dirección"
+            placeholder="Dirección completa"
+            value={direccion}
+            onValueChanged={(e) => setDireccion(e.detail.value)}
+          />
         </VerticalLayout>
       </Dialog>
-      <Button onClick={open} theme="primary">Registrar Persona</Button>
+      <Button onClick={open} theme="primary">
+        Registrar Persona
+      </Button>
     </>
   );
 }
 
-// Puedes dejar tu PersonaEditForm igual que en tu código, solo cambia useSignal por useState si no usas Hilla signals.
+// Puedes agregar aquí tu PersonaEditForm si lo tienes
 
 export default function PersonaListView() {
   const [items, setItems] = useState<Persona[]>([]);
@@ -156,7 +242,9 @@ export default function PersonaListView() {
   const [criterio, setCriterio] = useState('');
   const [texto, setTexto] = useState('');
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const loadData = async () => {
     try {
@@ -182,35 +270,49 @@ export default function PersonaListView() {
       Notification.show('Seleccione un criterio e ingrese texto a buscar', {
         duration: 3000,
         position: 'top-center',
-        theme: 'error'
+        theme: 'error',
       });
       return;
     }
     const searchText = texto.trim().toLowerCase();
-    const filteredResults = allItems.filter(item => {
+    const filteredResults = allItems.filter((item) => {
       let fieldValue = '';
       switch (criterio) {
-        case 'nombres': fieldValue = item.nombres?.toLowerCase() || ''; break;
-        case 'apellidos': fieldValue = item.apellidos?.toLowerCase() || ''; break;
-        case 'email': fieldValue = item.email?.toLowerCase() || ''; break;
-        case 'identificacion': fieldValue = item.identificacion?.toLowerCase() || ''; break;
-        case 'telefono': fieldValue = item.telefono?.toLowerCase() || ''; break;
-        default: return false;
+        case 'nombres':
+          fieldValue = item.nombres?.toLowerCase() || '';
+          break;
+        case 'apellidos':
+          fieldValue = item.apellidos?.toLowerCase() || '';
+          break;
+        case 'email':
+          fieldValue = item.email?.toLowerCase() || '';
+          break;
+        case 'identificacion':
+          fieldValue = item.identificacion?.toLowerCase() || '';
+          break;
+        case 'telefono':
+          fieldValue = item.telefono?.toLowerCase() || '';
+          break;
+        default:
+          return false;
       }
       return fieldValue.startsWith(searchText);
     });
     setItems(filteredResults);
     if (filteredResults.length === 0) {
-      Notification.show(`No se encontraron personas que empiecen con "${texto}" en ${criterio}`, {
-        duration: 5000,
-        position: 'top-center',
-        theme: 'contrast'
-      });
+      Notification.show(
+        `No se encontraron personas que empiecen con "${texto}" en ${criterio}`,
+        {
+          duration: 5000,
+          position: 'top-center',
+          theme: 'contrast',
+        }
+      );
     } else {
       Notification.show(`Se encontraron ${filteredResults.length} resultado(s)`, {
         duration: 3000,
         position: 'bottom-end',
-        theme: 'success'
+        theme: 'success',
       });
     }
   };
@@ -226,7 +328,7 @@ export default function PersonaListView() {
     Notification.show(`Mostrando todas las personas (${allItems.length})`, {
       duration: 2000,
       position: 'bottom-end',
-      theme: 'success'
+      theme: 'success',
     });
   };
 
@@ -237,7 +339,9 @@ export default function PersonaListView() {
   function renderNombreCompleto({ item }: { item: Persona }) {
     return (
       <div>
-        <div style={{ fontWeight: 'bold' }}>{item.nombres} {item.apellidos}</div>
+        <div style={{ fontWeight: 'bold' }}>
+          {item.nombres} {item.apellidos}
+        </div>
         <div style={{ fontSize: '0.8em', color: 'var(--lumo-secondary-text-color)' }}>
           {item.email}
         </div>
@@ -257,7 +361,12 @@ export default function PersonaListView() {
   }
 
   function renderSexo({ item }: { item: Persona }) {
-    const color = item.sexo === 'FEMENINO' ? '#ff6b9d' : item.sexo === 'MASCULINO' ? '#4dabf7' : '#69db7c';
+    const color =
+      item.sexo === 'FEMENINO'
+        ? '#ff6b9d'
+        : item.sexo === 'MASCULINO'
+        ? '#4dabf7'
+        : '#69db7c';
     return (
       <span
         style={{
@@ -266,7 +375,7 @@ export default function PersonaListView() {
           backgroundColor: color + '20',
           color: color,
           fontSize: '0.8em',
-          fontWeight: 'bold'
+          fontWeight: 'bold',
         }}
       >
         {item.sexo}
@@ -278,7 +387,11 @@ export default function PersonaListView() {
     if (!item.fechaNacimiento) return <span>-</span>;
     const today = new Date();
     const birthDate = new Date(item.fechaNacimiento);
-    const age = today.getFullYear() - birthDate.getFullYear();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
     return <span>{age} años</span>;
   }
 
@@ -291,7 +404,7 @@ export default function PersonaListView() {
           backgroundColor: item.tieneCuenta ? '#51cf66' : '#ffd43b',
           color: item.tieneCuenta ? '#2b8a3e' : '#fab005',
           fontSize: '0.8em',
-          fontWeight: 'bold'
+          fontWeight: 'bold',
         }}
       >
         {item.tieneCuenta ? 'Con cuenta' : 'Sin cuenta'}
@@ -299,34 +412,61 @@ export default function PersonaListView() {
     );
   }
 
-  // Puedes agregar tu PersonaEditForm aquí igual que en tu código original
+  // Aquí puedes agregar tu PersonaEditForm si lo tienes
 
   return (
-    <main className="w-full h-full flex flex-col box-border gap-s p-m" style={{ background: '#f8f8fa' }}>
+    <main
+      className="w-full h-full flex flex-col box-border gap-s p-m"
+      style={{ background: '#f8f8fa' }}
+    >
       <ViewToolbar title="Gestión de Personas">
         <Group>
           <PersonaEntryForm onPersonaCreated={loadData} />
         </Group>
       </ViewToolbar>
       <HorizontalLayout theme="spacing">
-        <Select items={itemSelect} value={criterio} onValueChanged={(evt) => setCriterio(evt.detail.value)} placeholder="Seleccione un criterio" />
-        <TextField placeholder="Buscar por palabra..." style={{ width: '50%' }} value={texto} onValueChanged={(evt) => setTexto(evt.detail.value)} onKeyDown={onKeyDown}>
+        <Select
+          items={itemSelect}
+          value={criterio}
+          onValueChanged={(e) => setCriterio(e.detail.value)}
+          placeholder="Seleccione un criterio"
+        />
+        <TextField
+          placeholder="Buscar por palabra..."
+          style={{ width: '50%' }}
+          value={texto}
+          onValueChanged={(e) => setTexto(e.detail.value)}
+          onKeyDown={onKeyDown}
+        >
           <Icon slot="prefix" icon="vaadin:search" />
         </TextField>
-        <Button onClick={search} theme="primary">BUSCAR</Button>
-        <Button onClick={showAll} theme="secondary">MOSTRAR TODOS</Button>
+        <Button onClick={search} theme="primary">
+          BUSCAR
+        </Button>
+        <Button onClick={showAll} theme="secondary">
+          MOSTRAR TODOS
+        </Button>
       </HorizontalLayout>
-      <Grid items={items} style={{ background: 'white', borderRadius: 12, boxShadow: '0 2px 8px #0001' }}>
+      <Grid
+        items={items}
+        style={{ background: 'white', borderRadius: 12, boxShadow: '0 2px 8px #0001' }}
+      >
         <GridColumn header="#" renderer={renderIndex} width="60px" />
-        <GridSortColumn onDirectionChanged={(e) => {}} path="nombres" header="Persona" renderer={renderNombreCompleto} />
+        <GridSortColumn path="nombres" header="Persona" renderer={renderNombreCompleto} />
         <GridColumn header="Identificación" renderer={renderIdentificacion} width="150px" />
         <GridColumn header="Sexo" renderer={renderSexo} width="100px" />
         <GridColumn header="Edad" renderer={renderEdad} width="80px" />
         <GridColumn path="telefono" header="Teléfono" width="120px" />
         <GridColumn header="Estado" renderer={renderEstadoCuenta} width="110px" />
-        {/* Agrega aquí tu columna de acciones si tienes PersonaEditForm */}
+        {/* Aquí puedes agregar columna de acciones si tienes PersonaEditForm */}
       </Grid>
-      <div style={{ marginTop: '1rem', fontSize: '0.9rem', color: 'var(--lumo-secondary-text-color)' }}>
+      <div
+        style={{
+          marginTop: '1rem',
+          fontSize: '0.9rem',
+          color: 'var(--lumo-secondary-text-color)',
+        }}
+      >
         Total de personas: {items.length}
         {items.length !== allItems.length && (
           <span style={{ marginLeft: '10px', fontStyle: 'italic' }}>

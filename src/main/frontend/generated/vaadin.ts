@@ -32,7 +32,7 @@ import '@vaadin/icons/vaadin-iconset.js';
 import '@vaadin/icon/vaadin-icon.js';
 import './vaadin-featureflags.js';
 
-import '../index';
+import './index';
 
 import './vaadin-react.js';
 import 'Frontend/generated/jar-resources/vaadin-dev-tools/vaadin-dev-tools.js';

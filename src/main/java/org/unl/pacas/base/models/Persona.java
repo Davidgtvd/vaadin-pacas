@@ -1,10 +1,12 @@
 package org.unl.pacas.base.models;
 
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -12,55 +14,55 @@ import java.util.Objects;
 @Entity
 @Table(name = "personas")
 public class Persona implements Serializable {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     @NotBlank(message = "Los nombres son obligatorios")
     @Size(max = 100, message = "Los nombres no pueden tener más de 100 caracteres")
     @Column(nullable = false, length = 100)
     private String nombres;
-    
+
     @NotBlank(message = "Los apellidos son obligatorios")
     @Size(max = 100, message = "Los apellidos no pueden tener más de 100 caracteres")
     @Column(nullable = false, length = 100)
     private String apellidos;
-    
+
     @NotBlank(message = "El email es obligatorio")
     @Email(message = "El email debe tener un formato válido")
     @Size(max = 150, message = "El email no puede tener más de 150 caracteres")
     @Column(nullable = false, unique = true, length = 150)
     private String email;
-    
+
     @Pattern(regexp = "^[0-9+\\-\\s()]*$", message = "El teléfono solo puede contener números, espacios y símbolos +, -, (, )")
     @Size(max = 15, message = "El teléfono no puede tener más de 15 caracteres")
     @Column(length = 15)
     private String telefono;
-    
+
     @NotNull(message = "El tipo de identificación es obligatorio")
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_identificacion", nullable = false, length = 20)
     private TipoIdentificacion tipoIdentificacion;
-    
+
     @NotBlank(message = "La identificación es obligatoria")
     @Size(max = 20, message = "La identificación no puede tener más de 20 caracteres")
     @Column(nullable = false, length = 20)
     private String identificacion;
-    
+
     @NotNull(message = "El sexo es obligatorio")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
     private Sexo sexo;
-    
+
     @Size(max = 200, message = "La dirección no puede tener más de 200 caracteres")
     @Column(length = 200)
     private String direccion;
-    
+
     @Past(message = "La fecha de nacimiento debe ser anterior a hoy")
     @Column(name = "fecha_nacimiento")
     private LocalDate fechaNacimiento;
-    
+
     @OneToOne(mappedBy = "persona", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Cuenta cuenta;
 
@@ -73,7 +75,7 @@ public class Persona implements Serializable {
         this.email = email;
     }
 
-    public Persona(String nombres, String apellidos, String email, TipoIdentificacion tipoIdentificacion, 
+    public Persona(String nombres, String apellidos, String email, TipoIdentificacion tipoIdentificacion,
                    String identificacion, Sexo sexo) {
         this.nombres = nombres;
         this.apellidos = apellidos;

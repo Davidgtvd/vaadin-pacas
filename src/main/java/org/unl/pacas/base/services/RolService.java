@@ -2,33 +2,30 @@ package org.unl.pacas.base.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.unl.pacas.base.dao.dao_models.RolDao;
+import org.unl.pacas.base.dao.RolDao;
 import org.unl.pacas.base.models.Rol;
 import org.unl.pacas.base.controller.data_struct.list.LinkedList;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-@Transactional
 public class RolService {
 
     @Autowired
     private RolDao rolDao;
 
     // Operaciones CRUD básicas
-    @Transactional(readOnly = true)
+
     public List<Rol> findAll() {
-        return rolDao.findAll();
+        return linkedListToList(rolDao.findAll());
     }
 
-    @Transactional(readOnly = true)
     public Optional<Rol> findById(Long id) {
         return rolDao.findById(id);
     }
 
-    @Transactional(readOnly = true)
     public Optional<Rol> findByNombre(String nombre) {
         return rolDao.findByNombre(nombre);
     }
@@ -56,90 +53,129 @@ public class RolService {
     }
 
     // Validaciones
-    @Transactional(readOnly = true)
+
     public boolean existsByNombre(String nombre) {
         return rolDao.existsByNombre(nombre);
     }
 
-    @Transactional(readOnly = true)
     public boolean esNombreUnico(String nombre, Long idExcluir) {
-        return rolDao.esNombreUnico(nombre, idExcluir);
+        Optional<Rol> rolOpt = rolDao.findByNombre(nombre);
+        if (rolOpt.isEmpty()) return true;
+        if (idExcluir == null) return false;
+        return rolOpt.get().getId().equals(idExcluir);
     }
 
-    @Transactional(readOnly = true)
     public boolean sePuedeEliminar(Long id) {
         return rolDao.sePuedeEliminar(id);
     }
 
-    @Transactional(readOnly = true)
     public boolean existe(Long id) {
         return rolDao.existsById(id);
     }
 
-    // Búsquedas avanzadas
-    @Transactional(readOnly = true)
+    // Búsquedas avanzadas adaptadas
+
     public List<Rol> buscarPorNombre(String nombre) {
-        return rolDao.findByNombreContainingIgnoreCase(nombre);
+        List<Rol> todas = findAll();
+        List<Rol> filtradas = new ArrayList<>();
+        if (nombre == null || nombre.trim().isEmpty()) return filtradas;
+        String lower = nombre.toLowerCase();
+        for (Rol r : todas) {
+            if (r.getNombre() != null && r.getNombre().toLowerCase().contains(lower)) {
+                filtradas.add(r);
+            }
+        }
+        return filtradas;
     }
 
-    @Transactional(readOnly = true)
     public List<Rol> buscarPorDescripcion(String descripcion) {
-        return rolDao.findByDescripcionContainingIgnoreCase(descripcion);
+        List<Rol> todas = findAll();
+        List<Rol> filtradas = new ArrayList<>();
+        if (descripcion == null || descripcion.trim().isEmpty()) return filtradas;
+        String lower = descripcion.toLowerCase();
+        for (Rol r : todas) {
+            if (r.getDescripcion() != null && r.getDescripcion().toLowerCase().contains(lower)) {
+                filtradas.add(r);
+            }
+        }
+        return filtradas;
     }
 
-    @Transactional(readOnly = true)
     public List<Rol> buscarPorTexto(String texto) {
-        return rolDao.buscarPorTexto(texto);
+        List<Rol> todas = findAll();
+        List<Rol> filtradas = new ArrayList<>();
+        if (texto == null || texto.trim().isEmpty()) return filtradas;
+        String lower = texto.toLowerCase();
+        for (Rol r : todas) {
+            if ((r.getNombre() != null && r.getNombre().toLowerCase().contains(lower)) ||
+                (r.getDescripcion() != null && r.getDescripcion().toLowerCase().contains(lower))) {
+                filtradas.add(r);
+            }
+        }
+        return filtradas;
     }
 
-    @Transactional(readOnly = true)
     public List<Rol> findAllOrdenados(boolean ascendente) {
-        return ascendente ? rolDao.findAllByOrderByNombreAsc() : rolDao.findAllByOrderByNombreDesc();
+        List<Rol> lista = findAll();
+        lista.sort((r1, r2) -> {
+            int cmp = r1.getNombre().compareToIgnoreCase(r2.getNombre());
+            return ascendente ? cmp : -cmp;
+        });
+        return lista;
     }
 
-    @Transactional(readOnly = true)
     public List<Rol> findRolesConCuentas() {
-        return rolDao.findRolesConCuentas();
+        List<Rol> todas = findAll();
+        List<Rol> conCuentas = new ArrayList<>();
+        for (Rol r : todas) {
+            if (rolDao.contarCuentasPorRol(r.getId()) > 0) {
+                conCuentas.add(r);
+            }
+        }
+        return conCuentas;
     }
 
-    @Transactional(readOnly = true)
     public List<Rol> findRolesSinCuentas() {
-        return rolDao.findRolesSinCuentas();
+        List<Rol> todas = findAll();
+        List<Rol> sinCuentas = new ArrayList<>();
+        for (Rol r : todas) {
+            if (rolDao.contarCuentasPorRol(r.getId()) == 0) {
+                sinCuentas.add(r);
+            }
+        }
+        return sinCuentas;
     }
 
     // Métodos para LinkedList
-    @Transactional(readOnly = true)
+
     public LinkedList<Rol> findAllAsLinkedList() {
-        return rolDao.findAllAsLinkedList();
+        return rolDao.findAll();
     }
 
-    @Transactional(readOnly = true)
     public LinkedList<Rol> buscarPorTextoAsLinkedList(String texto) {
         return rolDao.buscarPorTextoAsLinkedList(texto);
     }
 
-    @Transactional(readOnly = true)
     public LinkedList<Rol> findAllOrderedAsLinkedList(boolean ascendente) {
         return rolDao.findAllOrderedAsLinkedList(ascendente);
     }
 
     // Estadísticas
-    @Transactional(readOnly = true)
-    public Long contarTotal() {
+
+    public long contarTotal() {
         return rolDao.contarTotalRoles();
     }
 
-    @Transactional(readOnly = true)
-    public Long contarCuentasPorRol(Long rolId) {
+    public long contarCuentasPorRol(Long rolId) {
         return rolDao.contarCuentasPorRol(rolId);
     }
 
-    @Transactional(readOnly = true)
     public List<Object[]> obtenerEstadisticas() {
         return rolDao.obtenerEstadisticasRoles();
     }
 
     // Inicialización de datos
+
     public void createDefaultRoles() {
         if (!existsByNombre("ADMIN")) {
             Rol admin = new Rol("ADMIN", "Administrador del sistema con acceso completo");
@@ -155,22 +191,20 @@ public class RolService {
         }
     }
 
-    @Transactional(readOnly = true)
     public Rol getRolAdmin() {
         return findByNombre("ADMIN").orElse(null);
     }
 
-    @Transactional(readOnly = true)
     public Rol getRolCliente() {
         return findByNombre("CLIENTE").orElse(null);
     }
 
-    @Transactional(readOnly = true)
     public Rol getRolVendedor() {
         return findByNombre("VENDEDOR").orElse(null);
     }
 
     // Métodos utilitarios para las vistas
+
     public Rol crearRol(String nombre, String descripcion) {
         if (!esNombreUnico(nombre, null)) {
             throw new IllegalArgumentException("Ya existe un rol con el nombre: " + nombre);
@@ -210,18 +244,16 @@ public class RolService {
         deleteById(id);
     }
 
-    // Métodos para formularios y validaciones en vistas
-    @Transactional(readOnly = true)
+    // Validaciones para formularios y vistas
+
     public boolean validarNombre(String nombre) {
         return nombre != null && !nombre.trim().isEmpty() && nombre.length() <= 50;
     }
 
-    @Transactional(readOnly = true)
     public boolean validarDescripcion(String descripcion) {
         return descripcion == null || descripcion.length() <= 200;
     }
 
-    @Transactional(readOnly = true)
     public String validarRol(Rol rol) {
         if (rol == null) {
             return "El rol no puede ser nulo";
@@ -242,19 +274,32 @@ public class RolService {
         return null; // Sin errores
     }
 
-    // Métodos para reportes
-    @Transactional(readOnly = true)
+    // Reportes
+
     public List<Rol> generarReporteRoles() {
         return findAllOrdenados(true);
     }
 
-    @Transactional(readOnly = true)
     public String generarResumenEstadisticas() {
-        Long total = contarTotal();
-        Long conCuentas = (long) findRolesConCuentas().size();
-        Long sinCuentas = (long) findRolesSinCuentas().size();
+        long total = contarTotal();
+        long conCuentas = findRolesConCuentas().size();
+        long sinCuentas = findRolesSinCuentas().size();
 
         return String.format("Total de roles: %d | Con cuentas: %d | Sin cuentas: %d",
                 total, conCuentas, sinCuentas);
+    }
+
+    // Método auxiliar para convertir LinkedList a List
+    private <T> List<T> linkedListToList(LinkedList<T> linkedList) {
+        List<T> list = new ArrayList<>();
+        if (linkedList != null) {
+            linkedList.forEach(list::add);
+        }
+        return list;
+    }
+
+    // Método para verificar existencia por id
+    public boolean existsById(Long id) {
+        return rolDao.existsById(id);
     }
 }

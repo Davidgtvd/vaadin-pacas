@@ -1,6 +1,14 @@
 import {
-  Button, Dialog, Grid, GridColumn, GridSortColumn,
-  HorizontalLayout, Icon, Select, TextField, VerticalLayout
+  Button,
+  Dialog,
+  Grid,
+  GridColumn,
+  GridSortColumn,
+  HorizontalLayout,
+  Icon,
+  Select,
+  TextField,
+  VerticalLayout,
 } from '@vaadin/react-components';
 import { Notification } from '@vaadin/react-components/Notification';
 import RolServices from 'Frontend/generated/RolServices';
@@ -20,7 +28,7 @@ type RolEntryFormProps = {
   onRolCreated?: () => void;
 };
 
-function RolEntryForm(props: RolEntryFormProps) {
+function RolEntryForm({ onRolCreated }: RolEntryFormProps) {
   const [dialogOpened, setDialogOpened] = useState(false);
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
@@ -38,7 +46,7 @@ function RolEntryForm(props: RolEntryFormProps) {
     try {
       if (nombre.trim().length > 0 && descripcion.trim().length > 0) {
         await RolServices.create(nombre.trim(), descripcion.trim(), imagen.trim());
-        props.onRolCreated?.();
+        onRolCreated?.();
         close();
         Notification.show('Rol creado exitosamente', { duration: 4000, theme: 'success' });
       } else {
@@ -189,7 +197,9 @@ export default function RolListView() {
   const [criterio, setCriterio] = useState('');
   const [texto, setTexto] = useState('');
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const loadData = async () => {
     try {
@@ -215,9 +225,14 @@ export default function RolListView() {
     const filtered = allItems.filter(item => {
       let fieldValue = '';
       switch (criterio) {
-        case 'nombre': fieldValue = item.nombre?.toLowerCase() || ''; break;
-        case 'descripcion': fieldValue = item.descripcion?.toLowerCase() || ''; break;
-        default: return false;
+        case 'nombre':
+          fieldValue = item.nombre?.toLowerCase() || '';
+          break;
+        case 'descripcion':
+          fieldValue = item.descripcion?.toLowerCase() || '';
+          break;
+        default:
+          return false;
       }
       return fieldValue.startsWith(searchText);
     });
@@ -276,12 +291,18 @@ export default function RolListView() {
           style={{ width: '50%' }}
           value={texto}
           onValueChanged={e => setTexto(e.detail.value)}
-          onKeyDown={e => { if (e.key === 'Enter') search(); }}
+          onKeyDown={e => {
+            if (e.key === 'Enter') search();
+          }}
         >
           <Icon slot="prefix" icon="vaadin:search" />
         </TextField>
-        <Button onClick={search} theme="primary">BUSCAR</Button>
-        <Button onClick={showAll} theme="secondary">MOSTRAR TODOS</Button>
+        <Button onClick={search} theme="primary">
+          BUSCAR
+        </Button>
+        <Button onClick={showAll} theme="secondary">
+          MOSTRAR TODOS
+        </Button>
       </HorizontalLayout>
 
       {/* Grid con datos */}
@@ -293,16 +314,16 @@ export default function RolListView() {
         <GridColumn header="Acciones" renderer={renderActions} width="110px" />
       </Grid>
 
-      <div style={{
-        marginTop: '1rem',
-        fontSize: '0.9rem',
-        color: 'var(--lumo-secondary-text-color)'
-      }}>
+      <div
+        style={{
+          marginTop: '1rem',
+          fontSize: '0.9rem',
+          color: 'var(--lumo-secondary-text-color)',
+        }}
+      >
         Total de roles: {items.length}
         {items.length !== allItems.length && (
-          <span style={{ marginLeft: '10px', fontStyle: 'italic' }}>
-            (de {allItems.length} totales)
-          </span>
+          <span style={{ marginLeft: '10px', fontStyle: 'italic' }}>(de {allItems.length} totales)</span>
         )}
       </div>
     </main>
