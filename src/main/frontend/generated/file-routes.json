@@ -1,0 +1,20 @@
+[
+  {
+    "route": "cuenta-list",
+    "flowLayout": false,
+    "params": {},
+    "title": "Cuenta List"
+  },
+  {
+    "route": "persona-list",
+    "flowLayout": false,
+    "params": {},
+    "title": "Persona List"
+  },
+  {
+    "route": "rol-list",
+    "flowLayout": false,
+    "params": {},
+    "title": "Rol List"
+  }
+]
