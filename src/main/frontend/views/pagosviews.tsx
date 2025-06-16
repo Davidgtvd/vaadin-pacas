@@ -340,4 +340,5 @@ export default function PagoListView() {
       </Grid>
     </VerticalLayout>
   );
+  
 }
