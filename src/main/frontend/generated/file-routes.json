@@ -6,6 +6,12 @@
     "title": "Cuenta List"
   },
   {
+    "route": "pagosviews",
+    "flowLayout": false,
+    "params": {},
+    "title": "Pago List"
+  },
+  {
     "route": "persona-list",
     "flowLayout": false,
     "params": {},
