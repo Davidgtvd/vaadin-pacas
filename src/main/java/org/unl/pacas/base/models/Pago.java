@@ -1,5 +1,4 @@
 package org.unl.pacas.base.models;
-
 import java.time.LocalDateTime;
 
 

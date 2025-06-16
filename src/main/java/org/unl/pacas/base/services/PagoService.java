@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class PagoService {
-    private Pago[] pagos = new Pago[100]; // Capacidad inicial
+    private Pago[] pagos = new Pago[100]; 
     private int size = 0;
     private long nextId = 1;
     
