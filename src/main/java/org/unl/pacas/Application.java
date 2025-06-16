@@ -26,20 +26,6 @@ public class Application extends SpringBootServletInitializer implements AppShel
         return Clock.systemDefaultZone();
     }
 
-    // OPCIONAL: Bean para poblar datos de prueba al arrancar la app
-    // Descomenta y personaliza si lo necesitas
-    /*
-    @Bean
-    public CommandLineRunner demo() {
-        return (args) -> {
-            // Ejemplo de uso de LinkedList con tu modelo Persona
-            // LinkedList<Persona> personas = new LinkedList<>();
-            // personas.add(new Persona("Juan", "Pérez", "juan@correo.com"));
-            // log.info("Personas de prueba cargadas: " + personas.print());
-        };
-    }
-    */
-
     public static void main(String[] args) {
         SpringApplication app = new SpringApplication(Application.class);
         Environment env = app.run(args).getEnvironment();

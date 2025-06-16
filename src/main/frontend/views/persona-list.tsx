@@ -13,10 +13,11 @@ import {
   DatePicker,
 } from '@vaadin/react-components';
 import { Notification } from '@vaadin/react-components/Notification';
-import PersonaServices from 'Frontend/generated/PersonaServices';
+import * as PersonaServices from 'Frontend/generated/PersonaServices';
 import handleError from 'Frontend/views/_ErrorHandler';
 import { Group, ViewToolbar } from 'Frontend/components/ViewToolbar';
 import { useEffect, useState } from 'react';
+import Rol from 'Frontend/generated/org/unl/pacas/base/models/Rol';
 
 type Persona = {
   id: string;
@@ -94,7 +95,7 @@ function PersonaEntryForm({ onPersonaCreated }: PersonaEntryFormProps) {
           sexo,
           telefono.trim(),
           direccion.trim(),
-          fechaNacimiento || null
+          fechaNacimiento || undefined
         );
         onPersonaCreated?.();
         close();
@@ -246,16 +247,48 @@ export default function PersonaListView() {
     loadData();
   }, []);
 
-  const loadData = async () => {
-    try {
-      const data = await PersonaServices.listAll();
-      const filteredData = (data ?? []).filter(Boolean);
-      setItems(filteredData);
-      setAllItems(filteredData);
-    } catch (error) {
-      handleError(error);
-    }
-  };
+// Helper type guard to filter only Persona objects
+function isPersona(x: any): x is Persona {
+  return (
+    x !== undefined &&
+    x !== null &&
+    typeof x === 'object' &&
+    typeof x.id === 'string' &&
+    typeof x.nombres === 'string' &&
+    typeof x.apellidos === 'string' &&
+    typeof x.email === 'string' &&
+    typeof x.tipoIdentificacion === 'string' &&
+    typeof x.identificacion === 'string' &&
+    typeof x.sexo === 'string'
+  );
+}
+
+const loadData = async () => {
+  try {
+    const data = await PersonaServices.listAll();
+    const mappedData: Persona[] = (data ?? [])
+      .filter((x: any) => x !== undefined && x !== null)
+      .map((x: any) => ({
+        id: String(x.id ?? ''),
+        nombres: String(x.nombres ?? ''),
+        apellidos: String(x.apellidos ?? ''),
+        email: String(x.email ?? ''),
+        tipoIdentificacion: String(x.tipoIdentificacion ?? ''),
+        identificacion: String(x.identificacion ?? ''),
+        sexo: String(x.sexo ?? ''),
+        telefono: x.telefono ? String(x.telefono) : undefined,
+        direccion: x.direccion ? String(x.direccion) : undefined,
+        fechaNacimiento: x.fechaNacimiento ? String(x.fechaNacimiento) : undefined,
+        nombreCompleto: x.nombreCompleto ? String(x.nombreCompleto) : undefined,
+        edad: typeof x.edad === 'number' ? x.edad : undefined,
+        tieneCuenta: typeof x.tieneCuenta === 'boolean' ? x.tieneCuenta : undefined,
+      }));
+    setItems(mappedData);
+    setAllItems(mappedData);
+  } catch (error) {
+    handleError(error);
+  }
+};
 
   const itemSelect = [
     { label: 'Nombres', value: 'nombres' },
@@ -317,7 +350,7 @@ export default function PersonaListView() {
     }
   };
 
-  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const onKeyDown = (e: React.KeyboardEvent<any>) => {
     if (e.key === 'Enter') search();
   };
 

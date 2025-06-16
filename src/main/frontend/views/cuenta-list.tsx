@@ -4,15 +4,16 @@ import {
   ComboBox,
   Dialog,
   Grid,
+  GridColumn,
   HorizontalLayout,
   Notification,
   PasswordField,
   TextField,
   VerticalLayout,
 } from '@vaadin/react-components';
-import CuentaServices from 'Frontend/generated/CuentaServices';
-import PersonaServices from 'Frontend/generated/PersonaServices';
-import RolServices from 'Frontend/generated/RolServices';
+import * as CuentaServices from 'Frontend/generated/CuentaServices';
+import * as PersonaServices from 'Frontend/generated/PersonaServices';
+import * as RolServices from 'Frontend/generated/RolServices';
 import handleError from 'Frontend/views/_ErrorHandler';
 import { useEffect, useState } from 'react';
 
@@ -39,7 +40,7 @@ type Cuenta = {
 };
 
 type Persona = {
-  id: string;
+  id: number;
   nombres: string;
   apellidos: string;
   email: string;
@@ -47,7 +48,7 @@ type Persona = {
 };
 
 type Rol = {
-  id: string;
+  id: number;
   nombre: string;
   descripcion: string;
 };
@@ -79,8 +80,8 @@ function CuentaEntryForm({ onCuentaCreated }: CuentaEntryFormProps) {
         PersonaServices.getPersonasSinCuenta(),
         RolServices.listAll(),
       ]);
-      setPersonas(personasData ?? []);
-      setRoles(rolesData ?? []);
+    setPersonas((personasData ?? []).filter(p => p !== undefined) as Persona[]);
+setRoles((rolesData ?? []).filter((r): r is Rol => r !== undefined && r !== null));
     } catch (error) {
       handleError(error);
     }
@@ -127,7 +128,7 @@ function CuentaEntryForm({ onCuentaCreated }: CuentaEntryFormProps) {
         draggable
         modeless
         opened={dialogOpened}
-        onOpenedChanged={(e) => setDialogOpened(e.detail.value)}
+        onOpenedChanged={(e: CustomEvent<{ value: boolean }>) => setDialogOpened(e.detail.value)}
         header={<h2 style={{ margin: 0 }}>Registrar Cuenta</h2>}
         footerRenderer={() => (
           <>
@@ -152,7 +153,7 @@ function CuentaEntryForm({ onCuentaCreated }: CuentaEntryFormProps) {
           />
           <ComboBox
             label="Rol"
-            items={roles.map(r => ({ label: `${r.nombre} - ${r.descripcion}`, value: r.id }))}
+            items={roles.map(r => ({ label: `${r.nombre} - ${r.descripcion}`, value: String(r.id) }))}
             value={rolId}
             onValueChanged={e => setRolId(e.detail.value)}
             placeholder="Seleccione un rol"
@@ -187,7 +188,7 @@ function CuentaEditForm({ cuenta, onCuentaUpdated }: CuentaEditFormProps) {
   const loadRoles = async () => {
     try {
       const rolesData = await RolServices.listAll();
-      setRoles(rolesData ?? []);
+      setRoles((rolesData ?? []).filter((r): r is Rol => r !== undefined));
     } catch (error) {
       handleError(error);
     }
@@ -208,7 +209,7 @@ function CuentaEditForm({ cuenta, onCuentaUpdated }: CuentaEditFormProps) {
         Notification.show('Usuario y rol son obligatorios', { duration: 4000, position: 'top-center', theme: 'error' });
         return;
       }
-      await CuentaServices.update(cuenta.id, usuario.trim(), parseInt(rolId), activo);
+      await CuentaServices.update(Number(cuenta.id), usuario.trim(), Number(rolId), activo);
       onCuentaUpdated?.();
       close();
       Notification.show('Cuenta actualizada exitosamente', { duration: 4000, position: 'bottom-end', theme: 'success' });
@@ -224,7 +225,7 @@ function CuentaEditForm({ cuenta, onCuentaUpdated }: CuentaEditFormProps) {
         draggable
         modeless
         opened={dialogOpened}
-        onOpenedChanged={(e) => setDialogOpened(e.detail.value)}
+        onOpenedChanged={(e: CustomEvent<{ value: boolean }>) => setDialogOpened(e.detail.value)}
         header={<h2 style={{ margin: 0 }}>Editar Cuenta</h2>}
         footerRenderer={() => (
           <>
@@ -245,11 +246,11 @@ function CuentaEditForm({ cuenta, onCuentaUpdated }: CuentaEditFormProps) {
           <ComboBox
             label="Estado"
             items={[
-              { label: 'Activo', value: true },
-              { label: 'Inactivo', value: false },
+              { label: 'Activo', value: 'true' },
+              { label: 'Inactivo', value: 'false' },
             ]}
-            value={activo}
-            onValueChanged={e => setActivo(e.detail.value)}
+            value={activo ? 'true' : 'false'}
+            onValueChanged={e => setActivo(e.detail.value === 'true')}
             required
           />
         </VerticalLayout>
@@ -271,7 +272,7 @@ export default function CuentaListView() {
       const data = filterUsuario.trim()
         ? await CuentaServices.buscarPorTexto(filterUsuario.trim())
         : await CuentaServices.listAll();
-      setCuentas(data ?? []);
+      setCuentas((data ?? []).filter((c): c is Cuenta => c !== undefined));
     } catch (error) {
       handleError(error);
     } finally {
@@ -302,31 +303,31 @@ export default function CuentaListView() {
       </HorizontalLayout>
 
       <Grid items={cuentas} style={{ height: '600px' }} loading={loading}>
-        <Grid.Column path="usuario" header="Usuario" />
-        <Grid.Column
+        <GridColumn path="usuario" header="Usuario" />
+        <GridColumn
           path="persona.nombreCompleto"
           header="Persona"
-          renderer={({ item }) => `${item.persona.nombres} ${item.persona.apellidos}`}
+          renderer={({ item }: { item: Cuenta }) => `${item.persona.nombres} ${item.persona.apellidos}`}
         />
-        <Grid.Column path="rol.nombre" header="Rol" />
-        <Grid.Column
+        <GridColumn path="rol.nombre" header="Rol" />
+        <GridColumn
           path="activo"
           header="Estado"
-          renderer={({ item }) => (item.activo ? 'Activo' : 'Inactivo')}
+          renderer={({ item }: { item: Cuenta }) => (item.activo ? 'Activo' : 'Inactivo')}
         />
-        <Grid.Column path="fechaCreacion" header="Fecha Creación" />
-        <Grid.Column path="ultimoAcceso" header="Último Acceso" />
-        <Grid.Column path="intentosFallidos" header="Intentos Fallidos" />
-        <Grid.Column
+        <GridColumn path="fechaCreacion" header="Fecha Creación" />
+        <GridColumn path="ultimoAcceso" header="Último Acceso" />
+        <GridColumn path="intentosFallidos" header="Intentos Fallidos" />
+        <GridColumn
           path="fechaBloqueo"
           header="Fecha Bloqueo"
-          renderer={({ item }) => item.fechaBloqueo ?? '-'}
+          renderer={({ item }: { item: Cuenta }) => item.fechaBloqueo ?? '-'}
         />
-        <Grid.Column
+        <GridColumn
           header="Acciones"
           width="150px"
           flexGrow={0}
-          renderer={({ item }) => <CuentaEditForm cuenta={item} onCuentaUpdated={onCuentaUpdated} />}
+          renderer={({ item }: { item: Cuenta }) => <CuentaEditForm cuenta={item} onCuentaUpdated={onCuentaUpdated} />}
         />
       </Grid>
     </VerticalLayout>
