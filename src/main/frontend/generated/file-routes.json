@@ -12,6 +12,12 @@
     "title": "Persona List"
   },
   {
+    "route": "producto-list",
+    "flowLayout": false,
+    "params": {},
+    "title": "Producto List"
+  },
+  {
     "route": "rol-list",
     "flowLayout": false,
     "params": {},
