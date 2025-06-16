@@ -1,48 +1,64 @@
 package org.unl.pacas.base.dao;
 
-import org.unl.pacas.base.dao.dao_struct.AdapterDao;
+import org.springframework.stereotype.Repository;
 import org.unl.pacas.base.models.Compra;
+import org.unl.pacas.base.controller.data_struct.list.LinkedList;
 
-public class CompraDao extends AdapterDao <Compra> {
-    private Compra obj;
+import java.util.Optional;
 
-    public CompraDao(){
-        super(Compra.class);
+@Repository
+public class CompraDao {
+
+    private final LinkedList<Compra> compras = new LinkedList<>();
+
+    public LinkedList<Compra> findAll() {
+        return compras;
     }
 
-    public Compra getObj() {
-        if (obj == null)
-            this.obj = new Compra();
-        return this.obj;
-    }
-
-    public void setObj(Compra obj) {
-        this.obj = obj;
-    }
-
-    
-    public Boolean save(){
-        try{
-            obj.setId(listAll().getLength()+1);
-            this.persist(obj);
-            return true;
-        }catch(Exception e){
-            return false;
+    public Optional<Compra> findById(Long id) {
+        for (Compra c : compras) {
+            if (c.getId() != null && c.getId().equals(id)) {
+                return Optional.of(c);
+            }
         }
+        return Optional.empty();
     }
 
-    public Boolean update(Integer pos){
-        try {
-        this.update(obj, pos);
-        return true;
-        }catch(Exception e){
-            return false;
+    public Compra save(Compra compra) {
+        if (compra.getId() == null) {
+            long maxId = 0;
+            for (Compra c : compras) {
+                if (c.getId() != null && c.getId() > maxId) {
+                    maxId = c.getId();
+                }
+            }
+            compra.setId(maxId + 1);
+            compras.add(compra);
+        } else {
+            Optional<Compra> existingOpt = findById(compra.getId());
+            if (existingOpt.isPresent()) {
+                Compra existing = existingOpt.get();
+                existing.setSubtotal(compra.getSubtotal());
+                existing.setNroFactura(compra.getNroFactura());
+                existing.setIva(compra.getIva());
+                existing.setTotal(compra.getTotal());
+                existing.setPersona(compra.getPersona());
+            } else {
+                compras.add(compra);
+            }
         }
-    }
-
-    public Compra deleteCompra(Integer id) throws Exception {
-        Compra compra = get(id);
-        remove(id);
         return compra;
-    }  
+    }
+
+    public void deleteById(Long id) {
+        compras.removeIf(c -> c.getId() != null && c.getId().equals(id));
+    }
+
+    public boolean existsById(Long id) {
+        return findById(id).isPresent();
+    }
+
+    public long contarTotalCompras() {
+        return compras.size();
+    }
 }
