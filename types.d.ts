@@ -3,7 +3,6 @@
 // This is needed for TypeScript compiler to declare and export as a TypeScript module.
 // It is recommended to commit this file to the VCS.
 // You might want to change the configurations to fit your preferences
-
 declare module '*.css?inline' {
   import type { CSSResultGroup } from 'lit';
   const content: CSSResultGroup;
@@ -16,9 +15,3 @@ declare module 'csstype' {
     [index: `--${string}`]: any;
   }
 }
-
-// Declaraciones para evitar errores de módulos no encontrados
-declare module 'views/*';
-declare module 'components/*';
-declare module 'generated/*';
-declare module 'themes/*';

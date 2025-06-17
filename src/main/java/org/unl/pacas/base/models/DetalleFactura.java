@@ -1,6 +1,7 @@
 package org.unl.pacas.base.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -12,45 +13,101 @@ public class DetalleFactura implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private float total;
+    @Positive(message = "La cantidad debe ser positiva")
+    @Column(nullable = false)
     private int cantidad;
+
+    @Positive(message = "El precio unitario debe ser positivo")
+    @Column(name = "precio_unitario", nullable = false)
     private float precioUnitario;
+
+    @PositiveOrZero(message = "El total debe ser cero o positivo")
+    @Column(nullable = false)
+    private float total;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "producto_id", nullable = false)
     private Producto producto;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "compra_id", nullable = false)
+    @JoinColumn(name = "factura_id", nullable = false)
+    private Factura factura;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "compra_id")
     private Compra compra;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "pago_id")
+    private Pago pago;
 
     public DetalleFactura() {}
 
-    public DetalleFactura(float total, int cantidad, float precioUnitario, Producto producto, Compra compra) {
-        this.total = total;
+    // Getters y setters
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public int getCantidad() {
+        return cantidad;
+    }
+
+    public void setCantidad(int cantidad) {
         this.cantidad = cantidad;
+    }
+
+    public float getPrecioUnitario() {
+        return precioUnitario;
+    }
+
+    public void setPrecioUnitario(float precioUnitario) {
         this.precioUnitario = precioUnitario;
+    }
+
+    public float getTotal() {
+        return total;
+    }
+
+    public void setTotal(float total) {
+        this.total = total;
+    }
+
+    public Producto getProducto() {
+        return producto;
+    }
+
+    public void setProducto(Producto producto) {
         this.producto = producto;
+    }
+
+    public Factura getFactura() {
+        return factura;
+    }
+
+    public void setFactura(Factura factura) {
+        this.factura = factura;
+    }
+
+    public Compra getCompra() {
+        return compra;
+    }
+
+    public void setCompra(Compra compra) {
         this.compra = compra;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Pago getPago() {
+        return pago;
+    }
 
-    public float getTotal() { return total; }
-    public void setTotal(float total) { this.total = total; }
-
-    public int getCantidad() { return cantidad; }
-    public void setCantidad(int cantidad) { this.cantidad = cantidad; }
-
-    public float getPrecioUnitario() { return precioUnitario; }
-    public void setPrecioUnitario(float precioUnitario) { this.precioUnitario = precioUnitario; }
-
-    public Producto getProducto() { return producto; }
-    public void setProducto(Producto producto) { this.producto = producto; }
-
-    public Compra getCompra() { return compra; }
-    public void setCompra(Compra compra) { this.compra = compra; }
+    public void setPago(Pago pago) {
+        this.pago = pago;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -63,10 +120,5 @@ public class DetalleFactura implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(id);
-    }
-
-    @Override
-    public String toString() {
-        return "DetalleFactura #" + id + " - Producto: " + (producto != null ? producto.toString() : "N/A");
     }
 }

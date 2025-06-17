@@ -1,5 +1,6 @@
-import { _getPropertyModel as _getPropertyModel_1, Email as Email_1, makeObjectEmptyValueCreator as makeObjectEmptyValueCreator_1, NotBlank as NotBlank_1, NotNull as NotNull_1, NumberModel as NumberModel_1, ObjectModel as ObjectModel_1, Past as Past_1, Pattern as Pattern_1, Size as Size_1, StringModel as StringModel_1 } from "@vaadin/hilla-lit-form";
+import { _getPropertyModel as _getPropertyModel_1, ArrayModel as ArrayModel_1, Email as Email_1, makeObjectEmptyValueCreator as makeObjectEmptyValueCreator_1, NotBlank as NotBlank_1, NotNull as NotNull_1, NumberModel as NumberModel_1, ObjectModel as ObjectModel_1, Past as Past_1, Pattern as Pattern_1, Size as Size_1, StringModel as StringModel_1 } from "@vaadin/hilla-lit-form";
 import CuentaModel_1 from "./CuentaModel.js";
+import FacturaModel_1 from "./FacturaModel.js";
 import type Persona_1 from "./Persona.js";
 import SexoModel_1 from "./SexoModel.js";
 import TipoIdentificacionModel_1 from "./TipoIdentificacionModel.js";
@@ -38,17 +39,11 @@ class PersonaModel<T extends Persona_1 = Persona_1> extends ObjectModel_1<T> {
     get cuenta(): CuentaModel_1 {
         return this[_getPropertyModel_1]("cuenta", (parent, key) => new CuentaModel_1(parent, key, true, { meta: { annotations: [{ name: "jakarta.persistence.OneToOne" }] } }));
     }
+    get facturas(): ArrayModel_1<FacturaModel_1> {
+        return this[_getPropertyModel_1]("facturas", (parent, key) => new ArrayModel_1(parent, key, true, (parent, key) => new FacturaModel_1(parent, key, true), { meta: { annotations: [{ name: "jakarta.persistence.OneToMany" }], javaType: "java.util.List" } }));
+    }
     get nombreCompleto(): StringModel_1 {
         return this[_getPropertyModel_1]("nombreCompleto", (parent, key) => new StringModel_1(parent, key, true, { meta: { javaType: "java.lang.String" } }));
-    }
-    get identificacionCompleta(): StringModel_1 {
-        return this[_getPropertyModel_1]("identificacionCompleta", (parent, key) => new StringModel_1(parent, key, true, { meta: { javaType: "java.lang.String" } }));
-    }
-    get edad(): NumberModel_1 {
-        return this[_getPropertyModel_1]("edad", (parent, key) => new NumberModel_1(parent, key, true, { meta: { javaType: "java.lang.Integer" } }));
-    }
-    get displayName(): StringModel_1 {
-        return this[_getPropertyModel_1]("displayName", (parent, key) => new StringModel_1(parent, key, true, { meta: { javaType: "java.lang.String" } }));
     }
 }
 export default PersonaModel;

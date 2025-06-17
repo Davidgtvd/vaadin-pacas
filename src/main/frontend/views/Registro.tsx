@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 
 interface RegistroProps {
   onClose: () => void;
+  onRegisterSuccess?: (usuario: { usuario: string; email: string }) => void;
 }
 
-const Registro: React.FC<RegistroProps> = ({ onClose }) => {
+const Registro: React.FC<RegistroProps> = ({ onClose, onRegisterSuccess }) => {
   const [usuario, setUsuario] = useState('');
   const [email, setEmail] = useState('');
   const [contrasena, setContrasena] = useState('');
@@ -28,10 +29,10 @@ const Registro: React.FC<RegistroProps> = ({ onClose }) => {
       return;
     }
 
-    // Aquí iría la llamada a la API para registrar usuario
-    // Por ahora simulamos éxito
+    // Simula éxito de registro local
     alert(`Usuario ${usuario} registrado con éxito!`);
     setError('');
+    onRegisterSuccess?.({ usuario, email });
     onClose();
   };
 

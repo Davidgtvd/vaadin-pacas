@@ -26,22 +26,16 @@
     "paths": {
       "@vaadin/flow-frontend": ["generated/jar-resources"],
       "@vaadin/flow-frontend/*": ["generated/jar-resources/*"],
-      "Frontend/*": ["*"]
-    },
-    "typeRoots": [
-      "./node_modules/@types",
-      "./src/main/frontend"
-    ]
+      "Frontend/*": ["*"],
+      "components/*": ["components/*"],
+      "types": ["node"]
+    }
   },
-
   "include": [
     "src/main/frontend/**/*",
-    "src/main/frontend/types.d.ts"
+    "types.d.ts"
   ],
   "exclude": [
     "src/main/frontend/generated/jar-resources/**"
-  ],
-  "files": [
-    "src/main/frontend/types.d.ts"
   ]
 }

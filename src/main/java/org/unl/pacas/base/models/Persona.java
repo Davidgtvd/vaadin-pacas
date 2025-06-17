@@ -1,14 +1,11 @@
 package org.unl.pacas.base.models;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Past;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-import jakarta.validation.constraints.NotNull;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -66,26 +63,25 @@ public class Persona implements Serializable {
     @OneToOne(mappedBy = "persona", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Cuenta cuenta;
 
-    // Constructores
+    @OneToMany(mappedBy = "persona", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Factura> facturas = new ArrayList<>();
+
+    // Constructor vacío (ya existente)
     public Persona() {}
 
-    public Persona(String nombres, String apellidos, String email) {
-        this.nombres = nombres;
-        this.apellidos = apellidos;
-        this.email = email;
-    }
+    // Constructor completo para facilitar creación de objetos
+    public Persona(String nombres, String apellidos, String email,
+               TipoIdentificacion tipoIdentificacion, String identificacion, Sexo sexo) {
+    this.nombres = nombres;
+    this.apellidos = apellidos;
+    this.email = email;
+    this.tipoIdentificacion = tipoIdentificacion;
+    this.identificacion = identificacion;
+    this.sexo = sexo;
+}
 
-    public Persona(String nombres, String apellidos, String email, TipoIdentificacion tipoIdentificacion,
-                   String identificacion, Sexo sexo) {
-        this.nombres = nombres;
-        this.apellidos = apellidos;
-        this.email = email;
-        this.tipoIdentificacion = tipoIdentificacion;
-        this.identificacion = identificacion;
-        this.sexo = sexo;
-    }
+    // Getters y Setters (sin cambios)
 
-    // Getters y Setters
     public Long getId() {
         return id;
     }
@@ -174,49 +170,33 @@ public class Persona implements Serializable {
         this.cuenta = cuenta;
     }
 
+    public List<Factura> getFacturas() {
+        return facturas;
+    }
+
+    public void setFacturas(List<Factura> facturas) {
+        this.facturas = facturas;
+    }
+
     // Métodos utilitarios para las vistas
+
     public String getNombreCompleto() {
         return (nombres != null ? nombres : "") + " " + (apellidos != null ? apellidos : "");
     }
 
-    /**
-     * Permite establecer el nombre completo en una sola cadena.
-     * Divide el nombre completo en nombres y apellidos (el último espacio separa).
-     */
-    public void setNombreCompleto(String nombreCompleto) {
-        if (nombreCompleto == null || nombreCompleto.trim().isEmpty()) {
-            this.nombres = "";
-            this.apellidos = "";
-            return;
-        }
-        String[] partes = nombreCompleto.trim().split(" ");
-        if (partes.length == 1) {
-            this.nombres = partes[0];
-            this.apellidos = "";
-        } else {
-            this.nombres = String.join(" ", java.util.Arrays.copyOf(partes, partes.length - 1));
-            this.apellidos = partes[partes.length - 1];
-        }
+    public void addFactura(Factura factura) {
+        facturas.add(factura);
+        factura.setPersona(this);
     }
 
-    public String getDisplayName() {
-        return getNombreCompleto() + " (" + email + ")";
-    }
-
-    public String getIdentificacionCompleta() {
-        return tipoIdentificacion != null ? tipoIdentificacion.name() + ": " + identificacion : identificacion;
-    }
-
-    public Integer getEdad() {
-        if (fechaNacimiento != null) {
-            return LocalDate.now().getYear() - fechaNacimiento.getYear();
-        }
-        return null;
+    public void removeFactura(Factura factura) {
+        facturas.remove(factura);
+        factura.setPersona(null);
     }
 
     @Override
     public String toString() {
-        return getDisplayName();
+        return getNombreCompleto() + " (" + email + ")";
     }
 
     @Override

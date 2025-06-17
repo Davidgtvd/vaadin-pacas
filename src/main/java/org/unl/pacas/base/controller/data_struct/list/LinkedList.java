@@ -107,6 +107,14 @@ public class LinkedList<E> implements Iterable<E> {
         addLast(data);
     }
 
+    /** Añade todos los elementos de otra LinkedList */
+    public void addAll(LinkedList<E> other) {
+        if (other == null || other.isEmpty()) return;
+        for (E item : other) {
+            this.add(item);
+        }
+    }
+
     /** Retorna representación en String */
     public String print() {
         if (isEmpty()) return "Está vacía";

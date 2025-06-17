@@ -1,4 +1,3 @@
-// cuenta-list.tsx
 import {
   Button,
   ComboBox,
@@ -6,328 +5,348 @@ import {
   Grid,
   GridColumn,
   HorizontalLayout,
-  Notification,
-  PasswordField,
+  NumberField,
   TextField,
   VerticalLayout,
+  Notification,
 } from '@vaadin/react-components';
-import * as CuentaServices from 'Frontend/generated/CuentaServices';
-import * as PersonaServices from 'Frontend/generated/PersonaServices';
-import * as RolServices from 'Frontend/generated/RolServices';
-import handleError from 'Frontend/views/_ErrorHandler';
-import { useEffect, useState } from 'react';
-
-type Cuenta = {
-  id: string;
-  usuario: string;
-  activo: boolean;
-  fechaCreacion: string;
-  ultimoAcceso?: string;
-  intentosFallidos: number;
-  fechaBloqueo?: string;
-  persona: {
-    id: string;
-    nombres: string;
-    apellidos: string;
-    email: string;
-    nombreCompleto?: string;
-  };
-  rol: {
-    id: string;
-    nombre: string;
-    descripcion: string;
-  };
-};
+import { useState } from 'react';
 
 type Persona = {
-  id: number;
-  nombres: string;
-  apellidos: string;
-  email: string;
+  id: string;
   nombreCompleto: string;
 };
 
-type Rol = {
-  id: number;
-  nombre: string;
-  descripcion: string;
+type Compra = {
+  id: string;
+  subtotal: number;
+  nroFactura: string;
+  iva: number;
+  total: number;
+  persona: Persona;
 };
 
-// --- FORMULARIO DE CREAR CUENTA ---
-type CuentaEntryFormProps = {
-  onCuentaCreated?: () => void;
-};
+// Datos simulados
+const personasMock: Persona[] = [
+  { id: '1', nombreCompleto: 'Juan Perez' },
+  { id: '2', nombreCompleto: 'Maria Gomez' },
+];
 
-function CuentaEntryForm({ onCuentaCreated }: CuentaEntryFormProps) {
+const comprasMock: Compra[] = [
+  {
+    id: '1',
+    subtotal: 100,
+    nroFactura: 'F001',
+    iva: 12,
+    total: 112,
+    persona: personasMock[0],
+  },
+  {
+    id: '2',
+    subtotal: 200,
+    nroFactura: 'F002',
+    iva: 24,
+    total: 224,
+    persona: personasMock[1],
+  },
+];
+
+function CompraEntryForm({ onCompraCreated }: { onCompraCreated?: (compra: Compra) => void }) {
   const [dialogOpened, setDialogOpened] = useState(false);
-  const [usuario, setUsuario] = useState('');
-  const [contrasena, setContrasena] = useState('');
-  const [confirmarContrasena, setConfirmarContrasena] = useState('');
-  const [rolId, setRolId] = useState('');
-  const [personaId, setPersonaId] = useState('');
-  const [personas, setPersonas] = useState<Persona[]>([]);
-  const [roles, setRoles] = useState<Rol[]>([]);
-
-  useEffect(() => {
-    if (dialogOpened) {
-      loadPersonasYRoles();
-    }
-  }, [dialogOpened]);
-
-  const loadPersonasYRoles = async () => {
-    try {
-      const [personasData, rolesData] = await Promise.all([
-        PersonaServices.getPersonasSinCuenta(),
-        RolServices.listAll(),
-      ]);
-    setPersonas((personasData ?? []).filter(p => p !== undefined) as Persona[]);
-setRoles((rolesData ?? []).filter((r): r is Rol => r !== undefined && r !== null));
-    } catch (error) {
-      handleError(error);
-    }
-  };
+  const [subtotal, setSubtotal] = useState<number | undefined>(undefined);
+  const [nroFactura, setNroFactura] = useState('');
+  const [iva, setIva] = useState<number | undefined>(undefined);
+  const [total, setTotal] = useState<number | undefined>(undefined);
+  const [personaId, setPersonaId] = useState<string | undefined>(undefined);
+  const [personas] = useState(personasMock);
 
   const open = () => setDialogOpened(true);
 
   const close = () => {
     setDialogOpened(false);
-    setUsuario('');
-    setContrasena('');
-    setConfirmarContrasena('');
-    setRolId('');
-    setPersonaId('');
+    setSubtotal(undefined);
+    setNroFactura('');
+    setIva(undefined);
+    setTotal(undefined);
+    setPersonaId(undefined);
   };
 
-  const createCuenta = async () => {
-    try {
-      if (!usuario.trim() || !contrasena || !confirmarContrasena || !rolId || !personaId) {
-        Notification.show('Todos los campos son obligatorios', { duration: 4000, position: 'top-center', theme: 'error' });
-        return;
-      }
-      if (contrasena !== confirmarContrasena) {
-        Notification.show('Las contraseñas no coinciden', { duration: 4000, position: 'top-center', theme: 'error' });
-        return;
-      }
-      if (contrasena.length < 6) {
-        Notification.show('La contraseña debe tener al menos 6 caracteres', { duration: 4000, position: 'top-center', theme: 'error' });
-        return;
-      }
-      await CuentaServices.create(usuario.trim(), contrasena, parseInt(rolId), parseInt(personaId));
-      onCuentaCreated?.();
-      close();
-      Notification.show('Cuenta creada exitosamente', { duration: 4000, position: 'bottom-end', theme: 'success' });
-    } catch (error) {
-      handleError(error);
+  const createCompra = () => {
+    if (
+      subtotal === undefined ||
+      !nroFactura.trim() ||
+      iva === undefined ||
+      total === undefined ||
+      !personaId
+    ) {
+      Notification.show('Todos los campos son obligatorios', {
+        duration: 4000,
+        position: 'top-center',
+        theme: 'error',
+      });
+      return;
     }
+
+    const nuevaCompra: Compra = {
+      id: String(Date.now()),
+      subtotal,
+      nroFactura: nroFactura.trim(),
+      iva,
+      total,
+      persona: personas.find(p => p.id === personaId)!,
+    };
+
+    onCompraCreated?.(nuevaCompra);
+    close();
+    Notification.show('Compra registrada exitosamente', {
+      duration: 4000,
+      position: 'bottom-end',
+      theme: 'success',
+    });
   };
 
   return (
     <>
       <Dialog
-        aria-label="Registrar Cuenta"
+        aria-label="Registrar Compra"
         draggable
         modeless
         opened={dialogOpened}
         onOpenedChanged={(e: CustomEvent<{ value: boolean }>) => setDialogOpened(e.detail.value)}
-        header={<h2 style={{ margin: 0 }}>Registrar Cuenta</h2>}
+        header={<h2 style={{ margin: 0 }}>Registrar Compra</h2>}
         footerRenderer={() => (
           <>
             <Button onClick={close}>Cancelar</Button>
-            <Button theme="primary" onClick={createCuenta}>Registrar</Button>
-          </>
-        )}
-      >
-        <VerticalLayout theme="spacing" style={{ width: '450px', maxWidth: '100%' }}>
-          <TextField label="Usuario" placeholder="Nombre de usuario único" value={usuario} onValueChanged={e => setUsuario(e.detail.value)} required />
-          <HorizontalLayout theme="spacing">
-            <PasswordField label="Contraseña" placeholder="Mínimo 6 caracteres" value={contrasena} onValueChanged={e => setContrasena(e.detail.value)} required style={{ flex: 1 }} />
-            <PasswordField label="Confirmar Contraseña" placeholder="Repetir contraseña" value={confirmarContrasena} onValueChanged={e => setConfirmarContrasena(e.detail.value)} required style={{ flex: 1 }} />
-          </HorizontalLayout>
-          <ComboBox
-            label="Persona"
-            items={personas.map(p => ({ label: `${p.nombreCompleto} (${p.email})`, value: p.id }))}
-            value={personaId}
-            onValueChanged={e => setPersonaId(e.detail.value)}
-            placeholder="Seleccione una persona"
-            required
-          />
-          <ComboBox
-            label="Rol"
-            items={roles.map(r => ({ label: `${r.nombre} - ${r.descripcion}`, value: String(r.id) }))}
-            value={rolId}
-            onValueChanged={e => setRolId(e.detail.value)}
-            placeholder="Seleccione un rol"
-            required
-          />
-        </VerticalLayout>
-      </Dialog>
-      <Button theme="primary" onClick={open}>Registrar Cuenta</Button>
-    </>
-  );
-}
-
-// --- FORMULARIO DE EDICIÓN ---
-type CuentaEditFormProps = {
-  cuenta: Cuenta;
-  onCuentaUpdated?: () => void;
-};
-
-function CuentaEditForm({ cuenta, onCuentaUpdated }: CuentaEditFormProps) {
-  const [dialogOpened, setDialogOpened] = useState(false);
-  const [usuario, setUsuario] = useState(cuenta.usuario);
-  const [rolId, setRolId] = useState(cuenta.rol.id);
-  const [activo, setActivo] = useState(cuenta.activo);
-  const [roles, setRoles] = useState<Rol[]>([]);
-
-  useEffect(() => {
-    if (dialogOpened) {
-      loadRoles();
-    }
-  }, [dialogOpened]);
-
-  const loadRoles = async () => {
-    try {
-      const rolesData = await RolServices.listAll();
-      setRoles((rolesData ?? []).filter((r): r is Rol => r !== undefined));
-    } catch (error) {
-      handleError(error);
-    }
-  };
-
-  const open = () => setDialogOpened(true);
-
-  const close = () => {
-    setDialogOpened(false);
-    setUsuario(cuenta.usuario);
-    setRolId(cuenta.rol.id);
-    setActivo(cuenta.activo);
-  };
-
-  const updateCuenta = async () => {
-    try {
-      if (!usuario.trim() || !rolId) {
-        Notification.show('Usuario y rol son obligatorios', { duration: 4000, position: 'top-center', theme: 'error' });
-        return;
-      }
-      await CuentaServices.update(Number(cuenta.id), usuario.trim(), Number(rolId), activo);
-      onCuentaUpdated?.();
-      close();
-      Notification.show('Cuenta actualizada exitosamente', { duration: 4000, position: 'bottom-end', theme: 'success' });
-    } catch (error) {
-      handleError(error);
-    }
-  };
-
-  return (
-    <>
-      <Dialog
-        aria-label="Editar Cuenta"
-        draggable
-        modeless
-        opened={dialogOpened}
-        onOpenedChanged={(e: CustomEvent<{ value: boolean }>) => setDialogOpened(e.detail.value)}
-        header={<h2 style={{ margin: 0 }}>Editar Cuenta</h2>}
-        footerRenderer={() => (
-          <>
-            <Button onClick={close}>Cancelar</Button>
-            <Button theme="primary" onClick={updateCuenta}>Guardar</Button>
+            <Button theme="primary" onClick={createCompra}>
+              Registrar
+            </Button>
           </>
         )}
       >
         <VerticalLayout theme="spacing" style={{ width: '400px', maxWidth: '100%' }}>
-          <TextField label="Usuario" value={usuario} onValueChanged={e => setUsuario(e.detail.value)} required />
-          <ComboBox
-            label="Rol"
-            items={roles.map(r => ({ label: `${r.nombre} - ${r.descripcion}`, value: r.id }))}
-            value={rolId}
-            onValueChanged={e => setRolId(e.detail.value)}
+          <NumberField
+            label="Subtotal"
+            value={subtotal?.toString() ?? ''}
+            onValueChanged={(e) => setSubtotal(e.detail.value ? parseFloat(e.detail.value) : undefined)}
+            min={0.01}
+            required
+          />
+          <TextField
+            label="Nro. Factura"
+            value={nroFactura}
+            onValueChanged={(e) => setNroFactura(e.detail.value)}
+            required
+          />
+          <NumberField
+            label="IVA"
+            value={iva?.toString() ?? ''}
+            onValueChanged={(e) => setIva(e.detail.value ? parseFloat(e.detail.value) : undefined)}
+            min={0}
+            required
+          />
+          <NumberField
+            label="Total"
+            value={total?.toString() ?? ''}
+            onValueChanged={(e) => setTotal(e.detail.value ? parseFloat(e.detail.value) : undefined)}
+            min={0.01}
             required
           />
           <ComboBox
-            label="Estado"
-            items={[
-              { label: 'Activo', value: 'true' },
-              { label: 'Inactivo', value: 'false' },
-            ]}
-            value={activo ? 'true' : 'false'}
-            onValueChanged={e => setActivo(e.detail.value === 'true')}
+            label="Persona"
+            items={personas}
+            itemLabelPath="nombreCompleto"
+            itemValuePath="id"
+            value={personaId}
+            onValueChanged={(e) => setPersonaId(e.detail.value)}
             required
+            placeholder="Seleccione una persona"
           />
         </VerticalLayout>
       </Dialog>
-      <Button onClick={open}>Editar</Button>
+      <Button theme="primary" onClick={open}>
+        Registrar Compra
+      </Button>
     </>
   );
 }
 
-// --- VISTA PRINCIPAL ---
-export default function CuentaListView() {
-  const [cuentas, setCuentas] = useState<Cuenta[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [filterUsuario, setFilterUsuario] = useState('');
+function CompraEditForm({ compra, onCompraUpdated }: { compra: Compra; onCompraUpdated?: (compra: Compra) => void }) {
+  const [dialogOpened, setDialogOpened] = useState(false);
+  const [subtotal, setSubtotal] = useState<number>(compra.subtotal);
+  const [nroFactura, setNroFactura] = useState(compra.nroFactura);
+  const [iva, setIva] = useState<number>(compra.iva);
+  const [total, setTotal] = useState<number>(compra.total);
+  const [personaId, setPersonaId] = useState<string>(compra.persona.id);
+  const [personas] = useState(personasMock);
 
-  const loadCuentas = async () => {
-    setLoading(true);
-    try {
-      const data = filterUsuario.trim()
-        ? await CuentaServices.buscarPorTexto(filterUsuario.trim())
-        : await CuentaServices.listAll();
-      setCuentas((data ?? []).filter((c): c is Cuenta => c !== undefined));
-    } catch (error) {
-      handleError(error);
-    } finally {
-      setLoading(false);
-    }
+  const open = () => setDialogOpened(true);
+
+  const close = () => {
+    setDialogOpened(false);
+    setSubtotal(compra.subtotal);
+    setNroFactura(compra.nroFactura);
+    setIva(compra.iva);
+    setTotal(compra.total);
+    setPersonaId(compra.persona.id);
   };
 
-  useEffect(() => {
-    loadCuentas();
-  }, []);
+  const updateCompra = () => {
+    if (
+      subtotal === undefined ||
+      !nroFactura.trim() ||
+      iva === undefined ||
+      total === undefined ||
+      !personaId
+    ) {
+      Notification.show('Todos los campos son obligatorios', {
+        duration: 4000,
+        position: 'top-center',
+        theme: 'error',
+      });
+      return;
+    }
 
-  const onCuentaCreated = () => loadCuentas();
-  const onCuentaUpdated = () => loadCuentas();
+    const compraActualizada: Compra = {
+      id: compra.id,
+      subtotal,
+      nroFactura: nroFactura.trim(),
+      iva,
+      total,
+      persona: personas.find(p => p.id === personaId)!,
+    };
+
+    onCompraUpdated?.(compraActualizada);
+    close();
+    Notification.show('Compra actualizada exitosamente', {
+      duration: 4000,
+      position: 'bottom-end',
+      theme: 'success',
+    });
+  };
+
+  return (
+    <>
+      <Dialog
+        aria-label="Editar Compra"
+        draggable
+        modeless
+        opened={dialogOpened}
+        onOpenedChanged={(e: CustomEvent<{ value: boolean }>) => setDialogOpened(e.detail.value)}
+        header={<h2 style={{ margin: 0 }}>Editar Compra</h2>}
+        footerRenderer={() => (
+          <>
+            <Button onClick={close}>Cancelar</Button>
+            <Button theme="primary" onClick={updateCompra}>
+              Guardar
+            </Button>
+          </>
+        )}
+      >
+        <VerticalLayout theme="spacing" style={{ width: '400px', maxWidth: '100%' }}>
+          <NumberField
+            label="Subtotal"
+            value={subtotal?.toString() ?? ''}
+            onValueChanged={(e) => setSubtotal(e.detail.value ? parseFloat(e.detail.value) : 0)}
+            min={0.01}
+            required
+          />
+          <TextField
+            label="Nro. Factura"
+            value={nroFactura}
+            onValueChanged={(e) => setNroFactura(e.detail.value)}
+            required
+          />
+          <NumberField
+            label="IVA"
+            value={iva?.toString() ?? ''}
+            onValueChanged={(e) => setIva(e.detail.value ? parseFloat(e.detail.value) : 0)}
+            min={0}
+            required
+          />
+          <NumberField
+            label="Total"
+            value={total?.toString() ?? ''}
+            onValueChanged={(e) => setTotal(e.detail.value ? parseFloat(e.detail.value) : 0)}
+            min={0.01}
+            required
+          />
+          <ComboBox
+            label="Persona"
+            items={personas}
+            itemLabelPath="nombreCompleto"
+            itemValuePath="id"
+            value={personaId}
+            onValueChanged={(e) => setPersonaId(e.detail.value)}
+            required
+            placeholder="Seleccione una persona"
+          />
+        </VerticalLayout>
+      </Dialog>
+      <Button onClick={open} theme="tertiary">
+        Editar
+      </Button>
+    </>
+  );
+}
+
+export default function CompraListView() {
+  const [compras, setCompras] = useState<Compra[]>(comprasMock);
+  const [filterTexto, setFilterTexto] = useState('');
+
+  const filteredCompras = compras.filter(c =>
+    c.persona.nombreCompleto.toLowerCase().includes(filterTexto.toLowerCase())
+  );
+
+  const onCompraCreated = (nuevaCompra: Compra) => {
+    setCompras([...compras, nuevaCompra]);
+  };
+
+  const onCompraUpdated = (compraActualizada: Compra) => {
+    setCompras(compras.map(c => (c.id === compraActualizada.id ? compraActualizada : c)));
+  };
+
+  const clearFilters = () => {
+    setFilterTexto('');
+  };
 
   return (
     <VerticalLayout theme="spacing" style={{ width: '100%', height: '100%' }}>
-      <HorizontalLayout theme="spacing" style={{ alignItems: 'center' }}>
-        <TextField
-          label="Buscar usuario"
-          value={filterUsuario}
-          onValueChanged={e => setFilterUsuario(e.detail.value)}
-          clearButtonVisible
-        />
-        <Button theme="primary" onClick={loadCuentas} disabled={loading}>
-          Buscar
-        </Button>
-        <CuentaEntryForm onCuentaCreated={onCuentaCreated} />
-      </HorizontalLayout>
-
-      <Grid items={cuentas} style={{ height: '600px' }} loading={loading}>
-        <GridColumn path="usuario" header="Usuario" />
-        <GridColumn
-          path="persona.nombreCompleto"
-          header="Persona"
-          renderer={({ item }: { item: Cuenta }) => `${item.persona.nombres} ${item.persona.apellidos}`}
-        />
-        <GridColumn path="rol.nombre" header="Rol" />
-        <GridColumn
-          path="activo"
-          header="Estado"
-          renderer={({ item }: { item: Cuenta }) => (item.activo ? 'Activo' : 'Inactivo')}
-        />
-        <GridColumn path="fechaCreacion" header="Fecha Creación" />
-        <GridColumn path="ultimoAcceso" header="Último Acceso" />
-        <GridColumn path="intentosFallidos" header="Intentos Fallidos" />
-        <GridColumn
-          path="fechaBloqueo"
-          header="Fecha Bloqueo"
-          renderer={({ item }: { item: Cuenta }) => item.fechaBloqueo ?? '-'}
-        />
+      {/* Filtros y acciones */}
+      <VerticalLayout theme="spacing">
+        <HorizontalLayout theme="spacing" style={{ alignItems: 'end', flexWrap: 'wrap' }}>
+          <TextField
+            label="Buscar por persona"
+            value={filterTexto}
+            onValueChanged={(e) => setFilterTexto(e.detail.value)}
+            clearButtonVisible
+            style={{ minWidth: '200px' }}
+          />
+          <Button theme="primary" disabled>
+            Buscar
+          </Button>
+          <Button theme="tertiary" onClick={clearFilters}>
+            Limpiar Filtros
+          </Button>
+        </HorizontalLayout>
+        <HorizontalLayout theme="spacing" style={{ alignItems: 'center' }}>
+          <CompraEntryForm onCompraCreated={onCompraCreated} />
+          <span style={{ color: 'var(--lumo-secondary-text-color)' }}>
+            Total: {filteredCompras.length} compra{filteredCompras.length !== 1 ? 's' : ''}
+          </span>
+        </HorizontalLayout>
+      </VerticalLayout>
+      {/* Grid de compras */}
+      <Grid items={filteredCompras} style={{ height: 400 }}>
+        <GridColumn path="nroFactura" header="Nro. Factura" />
+        <GridColumn path="subtotal" header="Subtotal" />
+        <GridColumn path="iva" header="IVA" />
+        <GridColumn path="total" header="Total" />
+        <GridColumn path="persona.nombreCompleto" header="Persona" />
         <GridColumn
           header="Acciones"
-          width="150px"
-          flexGrow={0}
-          renderer={({ item }: { item: Cuenta }) => <CuentaEditForm cuenta={item} onCuentaUpdated={onCuentaUpdated} />}
+          renderer={({ item }) => (
+            <CompraEditForm compra={item as Compra} onCompraUpdated={onCompraUpdated} />
+          )}
         />
       </Grid>
     </VerticalLayout>

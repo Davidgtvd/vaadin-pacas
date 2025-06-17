@@ -17,7 +17,12 @@ declare module 'csstype' {
   }
 }
 
-// Declaraciones para evitar errores de módulos no encontrados
+// Declaraciones para evitar errores de módulos no encontrados en servicios manuales
+declare module 'services/productoservices';
+declare module 'services/facturaservices';
+declare module 'services/personaservices';
+
+// Declaraciones para evitar errores de módulos no encontrados en otras carpetas
 declare module 'views/*';
 declare module 'components/*';
 declare module 'generated/*';

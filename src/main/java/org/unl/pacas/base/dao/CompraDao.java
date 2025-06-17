@@ -2,6 +2,7 @@ package org.unl.pacas.base.dao;
 
 import org.springframework.stereotype.Repository;
 import org.unl.pacas.base.models.Compra;
+import org.unl.pacas.base.models.Pago;
 import org.unl.pacas.base.controller.data_struct.list.LinkedList;
 
 import java.util.Optional;
@@ -10,6 +11,7 @@ import java.util.Optional;
 public class CompraDao {
 
     private final LinkedList<Compra> compras = new LinkedList<>();
+    private final LinkedList<Pago> pagos = new LinkedList<>(); // Asumiendo que tienes acceso a pagos aquí para la lógica
 
     public LinkedList<Compra> findAll() {
         return compras;
@@ -60,5 +62,33 @@ public class CompraDao {
 
     public long contarTotalCompras() {
         return compras.size();
+    }
+
+    /**
+     * Devuelve las compras que no tienen pagos asociados.
+     * Asume que tienes acceso a la lista de pagos para verificar.
+     */
+    public LinkedList<Compra> findComprasSinPago() {
+        LinkedList<Compra> sinPago = new LinkedList<>();
+        for (Compra compra : compras) {
+            boolean tienePago = false;
+            for (Pago pago : pagos) {
+                if (pago.getCompra() != null && pago.getCompra().getId() != null &&
+                    pago.getCompra().getId().equals(compra.getId())) {
+                    tienePago = true;
+                    break;
+                }
+            }
+            if (!tienePago) {
+                sinPago.add(compra);
+            }
+        }
+        return sinPago;
+    }
+
+    // Método para inyectar o actualizar la lista de pagos (si usas inyección o algún mecanismo)
+    public void setPagos(LinkedList<Pago> pagos) {
+        this.pagos.clear();
+        this.pagos.addAll(pagos);
     }
 }

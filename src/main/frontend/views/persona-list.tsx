@@ -11,13 +11,9 @@ import {
   TextField,
   VerticalLayout,
   DatePicker,
+  Notification,
 } from '@vaadin/react-components';
-import { Notification } from '@vaadin/react-components/Notification';
-import * as PersonaServices from 'Frontend/generated/PersonaServices';
-import handleError from 'Frontend/views/_ErrorHandler';
-import { Group, ViewToolbar } from 'Frontend/components/ViewToolbar';
-import { useEffect, useState } from 'react';
-import Rol from 'Frontend/generated/org/unl/pacas/base/models/Rol';
+import { useState, useEffect } from 'react';
 
 type Persona = {
   id: string;
@@ -35,12 +31,38 @@ type Persona = {
   tieneCuenta?: boolean;
 };
 
-// FORMULARIO DE CREAR
-type PersonaEntryFormProps = {
-  onPersonaCreated?: () => void;
-};
+// Datos simulados
+const personasMock: Persona[] = [
+  {
+    id: '1',
+    nombres: 'Juan',
+    apellidos: 'Perez',
+    email: 'juan.perez@example.com',
+    tipoIdentificacion: 'CEDULA',
+    identificacion: '0102030405',
+    sexo: 'MASCULINO',
+    telefono: '0999999999',
+    direccion: 'Av. Siempre Viva 123',
+    fechaNacimiento: '1990-05-15',
+    tieneCuenta: true,
+  },
+  {
+    id: '2',
+    nombres: 'Maria',
+    apellidos: 'Gomez',
+    email: 'maria.gomez@example.com',
+    tipoIdentificacion: 'PASAPORTE',
+    identificacion: 'X1234567',
+    sexo: 'FEMENINO',
+    telefono: '0988888888',
+    direccion: 'Calle Falsa 456',
+    fechaNacimiento: '1985-10-20',
+    tieneCuenta: false,
+  },
+];
 
-function PersonaEntryForm({ onPersonaCreated }: PersonaEntryFormProps) {
+// FORMULARIO DE CREAR PERSONA
+function PersonaEntryForm({ onPersonaCreated }: { onPersonaCreated?: () => void }) {
   const [dialogOpened, setDialogOpened] = useState(false);
   const [nombres, setNombres] = useState('');
   const [apellidos, setApellidos] = useState('');
@@ -78,45 +100,30 @@ function PersonaEntryForm({ onPersonaCreated }: PersonaEntryFormProps) {
     setFechaNacimiento('');
   };
 
-  const createPersona = async () => {
-    try {
-      if (
-        nombres.trim() &&
-        apellidos.trim() &&
-        email.trim() &&
-        identificacion.trim()
-      ) {
-        await PersonaServices.create(
-          nombres.trim(),
-          apellidos.trim(),
-          email.trim(),
-          tipoIdentificacion,
-          identificacion.trim(),
-          sexo,
-          telefono.trim(),
-          direccion.trim(),
-          fechaNacimiento || undefined
-        );
-        onPersonaCreated?.();
-        close();
-        Notification.show('Persona creada exitosamente', {
+  const createPersona = () => {
+    if (
+      !nombres.trim() ||
+      !apellidos.trim() ||
+      !email.trim() ||
+      !identificacion.trim()
+    ) {
+      Notification.show(
+        'Los campos nombres, apellidos, email e identificación son obligatorios',
+        {
           duration: 5000,
-          position: 'bottom-end',
-          theme: 'success',
-        });
-      } else {
-        Notification.show(
-          'Los campos nombres, apellidos, email e identificación son obligatorios',
-          {
-            duration: 5000,
-            position: 'top-center',
-            theme: 'error',
-          }
-        );
-      }
-    } catch (error) {
-      handleError(error);
+          position: 'top-center',
+          theme: 'error',
+        }
+      );
+      return;
     }
+    onPersonaCreated?.();
+    close();
+    Notification.show('Persona creada exitosamente', {
+      duration: 5000,
+      position: 'bottom-end',
+      theme: 'success',
+    });
   };
 
   return (
@@ -126,7 +133,7 @@ function PersonaEntryForm({ onPersonaCreated }: PersonaEntryFormProps) {
         draggable
         modeless
         opened={dialogOpened}
-        onOpenedChanged={(e) => setDialogOpened(e.detail.value)}
+        onOpenedChanged={(e: CustomEvent<{ value: boolean }>) => setDialogOpened(e.detail.value)}
         header={
           <h2
             className="draggable"
@@ -235,60 +242,11 @@ function PersonaEntryForm({ onPersonaCreated }: PersonaEntryFormProps) {
   );
 }
 
-// Puedes agregar aquí tu PersonaEditForm si lo tienes
-
 export default function PersonaListView() {
-  const [items, setItems] = useState<Persona[]>([]);
-  const [allItems, setAllItems] = useState<Persona[]>([]);
+  const [items, setItems] = useState<Persona[]>(personasMock);
+  const [allItems, setAllItems] = useState<Persona[]>(personasMock);
   const [criterio, setCriterio] = useState('');
   const [texto, setTexto] = useState('');
-
-  useEffect(() => {
-    loadData();
-  }, []);
-
-// Helper type guard to filter only Persona objects
-function isPersona(x: any): x is Persona {
-  return (
-    x !== undefined &&
-    x !== null &&
-    typeof x === 'object' &&
-    typeof x.id === 'string' &&
-    typeof x.nombres === 'string' &&
-    typeof x.apellidos === 'string' &&
-    typeof x.email === 'string' &&
-    typeof x.tipoIdentificacion === 'string' &&
-    typeof x.identificacion === 'string' &&
-    typeof x.sexo === 'string'
-  );
-}
-
-const loadData = async () => {
-  try {
-    const data = await PersonaServices.listAll();
-    const mappedData: Persona[] = (data ?? [])
-      .filter((x: any) => x !== undefined && x !== null)
-      .map((x: any) => ({
-        id: String(x.id ?? ''),
-        nombres: String(x.nombres ?? ''),
-        apellidos: String(x.apellidos ?? ''),
-        email: String(x.email ?? ''),
-        tipoIdentificacion: String(x.tipoIdentificacion ?? ''),
-        identificacion: String(x.identificacion ?? ''),
-        sexo: String(x.sexo ?? ''),
-        telefono: x.telefono ? String(x.telefono) : undefined,
-        direccion: x.direccion ? String(x.direccion) : undefined,
-        fechaNacimiento: x.fechaNacimiento ? String(x.fechaNacimiento) : undefined,
-        nombreCompleto: x.nombreCompleto ? String(x.nombreCompleto) : undefined,
-        edad: typeof x.edad === 'number' ? x.edad : undefined,
-        tieneCuenta: typeof x.tieneCuenta === 'boolean' ? x.tieneCuenta : undefined,
-      }));
-    setItems(mappedData);
-    setAllItems(mappedData);
-  } catch (error) {
-    handleError(error);
-  }
-};
 
   const itemSelect = [
     { label: 'Nombres', value: 'nombres' },
@@ -445,24 +403,28 @@ const loadData = async () => {
     );
   }
 
-  // Aquí puedes agregar tu PersonaEditForm si lo tienes
-
   return (
     <main
       className="w-full h-full flex flex-col box-border gap-s p-m"
       style={{ background: '#f8f8fa' }}
     >
-      <ViewToolbar title="Gestión de Personas">
-        <Group>
-          <PersonaEntryForm onPersonaCreated={loadData} />
-        </Group>
-      </ViewToolbar>
-      <HorizontalLayout theme="spacing">
+      <div style={{ padding: 'var(--lumo-space-m)' }}>
+        <PersonaEntryForm onPersonaCreated={() => {
+          // Aquí podrías agregar la lógica para agregar la persona al estado local si quieres
+          Notification.show('Funcionalidad de agregar persona local no implementada', {
+            duration: 3000,
+            position: 'bottom-end',
+            theme: 'contrast',
+          });
+        }} />
+      </div>
+      <HorizontalLayout theme="spacing" style={{ padding: '0 var(--lumo-space-m)' }}>
         <Select
           items={itemSelect}
           value={criterio}
           onValueChanged={(e) => setCriterio(e.detail.value)}
           placeholder="Seleccione un criterio"
+          style={{ width: '200px' }}
         />
         <TextField
           placeholder="Buscar por palabra..."
@@ -482,7 +444,7 @@ const loadData = async () => {
       </HorizontalLayout>
       <Grid
         items={items}
-        style={{ background: 'white', borderRadius: 12, boxShadow: '0 2px 8px #0001' }}
+        style={{ background: 'white', borderRadius: 12, boxShadow: '0 2px 8px #0001', margin: 'var(--lumo-space-m)' }}
       >
         <GridColumn header="#" renderer={renderIndex} width="60px" />
         <GridSortColumn path="nombres" header="Persona" renderer={renderNombreCompleto} />
@@ -491,13 +453,13 @@ const loadData = async () => {
         <GridColumn header="Edad" renderer={renderEdad} width="80px" />
         <GridColumn path="telefono" header="Teléfono" width="120px" />
         <GridColumn header="Estado" renderer={renderEstadoCuenta} width="110px" />
-        {/* Aquí puedes agregar columna de acciones si tienes PersonaEditForm */}
       </Grid>
       <div
         style={{
           marginTop: '1rem',
           fontSize: '0.9rem',
           color: 'var(--lumo-secondary-text-color)',
+          padding: '0 var(--lumo-space-m)',
         }}
       >
         Total de personas: {items.length}

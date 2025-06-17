@@ -79,7 +79,7 @@ public class CompraService {
         }
     }
 
-    // Búsquedas avanzadas (sin búsqueda por nroFactura)
+    // Búsquedas avanzadas
 
     public List<Compra> buscarPorPersona(Long personaId) {
         List<Compra> todas = findAll();
@@ -98,11 +98,18 @@ public class CompraService {
         if (texto == null || texto.trim().isEmpty()) return filtradas;
         String lower = texto.toLowerCase();
         for (Compra c : todas) {
-            if (c.getPersona() != null && c.getPersona().getNombreCompleto().toLowerCase().contains(lower)) {
+            if (c.getNroFactura() != null && c.getNroFactura().toLowerCase().contains(lower)) {
                 filtradas.add(c);
             }
         }
         return filtradas;
+    }
+
+    /**
+     * Busca compras cuyo número de factura contiene el texto (búsqueda para endpoint).
+     */
+    public List<Compra> findByNroFacturaContainingIgnoreCase(String texto) {
+        return buscarPorTexto(texto);
     }
 
     public List<Compra> findAllOrdenados(String campo, boolean ascendente) {
@@ -134,6 +141,11 @@ public class CompraService {
 
     public long contarTotal() {
         return compraDao.contarTotalCompras();
+    }
+
+    // Método para obtener compras sin pago (debes implementar en CompraDao)
+    public List<Compra> findComprasSinPago() {
+        return linkedListToList(compraDao.findComprasSinPago());
     }
 
     // Métodos utilitarios para las vistas

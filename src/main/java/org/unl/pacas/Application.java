@@ -24,7 +24,7 @@ public class Application extends SpringBootServletInitializer implements AppShel
     @Bean
     public Clock clock() {
         return Clock.systemDefaultZone();
-    }
+        }
 
     public static void main(String[] args) {
         SpringApplication app = new SpringApplication(Application.class);

@@ -9,11 +9,8 @@ import {
   Select,
   TextField,
   VerticalLayout,
+  Notification,
 } from '@vaadin/react-components';
-import { Notification } from '@vaadin/react-components/Notification';
-import * as RolServices from 'Frontend/generated/RolServices';
-import handleError from 'Frontend/views/_ErrorHandler';
-import { Group, ViewToolbar } from 'Frontend/components/ViewToolbar';
 import { useEffect, useState } from 'react';
 
 type Rol = {
@@ -24,11 +21,7 @@ type Rol = {
 };
 
 // FORMULARIO DE CREAR
-type RolEntryFormProps = {
-  onRolCreated?: () => void;
-};
-
-function RolEntryForm({ onRolCreated }: RolEntryFormProps) {
+function RolEntryForm({ onRolCreated }: { onRolCreated?: (rol: Rol) => void }) {
   const [dialogOpened, setDialogOpened] = useState(false);
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
@@ -42,19 +35,20 @@ function RolEntryForm({ onRolCreated }: RolEntryFormProps) {
     setImagen('');
   };
 
-  const createRol = async () => {
-    try {
-      if (nombre.trim().length > 0 && descripcion.trim().length > 0) {
-        await RolServices.create(nombre.trim(), descripcion.trim());
-        onRolCreated?.();
-        close();
-        Notification.show('Rol creado exitosamente', { duration: 4000, theme: 'success' });
-      } else {
-        Notification.show('Todos los campos son obligatorios', { duration: 4000, theme: 'error' });
-      }
-    } catch (error) {
-      handleError(error);
+  const createRol = () => {
+    if (nombre.trim().length === 0 || descripcion.trim().length === 0) {
+      Notification.show('Todos los campos son obligatorios', { duration: 4000, theme: 'error' });
+      return;
     }
+    const nuevoRol: Rol = {
+      id: Date.now(),
+      nombre: nombre.trim(),
+      descripcion: descripcion.trim(),
+      imagen: imagen.trim() || undefined,
+    };
+    onRolCreated?.(nuevoRol);
+    close();
+    Notification.show('Rol creado exitosamente', { duration: 4000, theme: 'success' });
   };
 
   return (
@@ -65,7 +59,7 @@ function RolEntryForm({ onRolCreated }: RolEntryFormProps) {
         modeless
         opened={dialogOpened}
         onOpenedChanged={e => setDialogOpened(e.detail.value)}
-        header={<h2 className="draggable" style={{ fontWeight: 'bold' }}>Registrar Rol</h2>}
+        header={<h2 style={{ fontWeight: 'bold' }}>Registrar Rol</h2>}
         footerRenderer={() => (
           <>
             <Button onClick={close}>Cancelar</Button>
@@ -100,12 +94,7 @@ function RolEntryForm({ onRolCreated }: RolEntryFormProps) {
 }
 
 // FORMULARIO DE EDICIÓN
-type RolEditFormProps = {
-  rol: Rol;
-  onRolUpdated?: () => void;
-};
-
-function RolEditForm({ rol, onRolUpdated }: RolEditFormProps) {
+function RolEditForm({ rol, onRolUpdated }: { rol: Rol; onRolUpdated?: (rol?: Rol) => void }) {
   const [dialogOpened, setDialogOpened] = useState(false);
   const [nombre, setNombre] = useState(rol.nombre);
   const [descripcion, setDescripcion] = useState(rol.descripcion);
@@ -120,31 +109,27 @@ function RolEditForm({ rol, onRolUpdated }: RolEditFormProps) {
   const open = () => setDialogOpened(true);
   const close = () => setDialogOpened(false);
 
-  const updateRol = async () => {
-    try {
-      if (nombre.trim().length > 0 && descripcion.trim().length > 0) {
-        await RolServices.update(Number(rol.id), nombre.trim(), descripcion.trim());
-        onRolUpdated?.();
-        close();
-        Notification.show('Rol actualizado exitosamente', { duration: 4000, theme: 'success' });
-      } else {
-        Notification.show('Todos los campos son obligatorios', { duration: 4000, theme: 'error' });
-      }
-    } catch (error) {
-      handleError(error);
+  const updateRol = () => {
+    if (nombre.trim().length === 0 || descripcion.trim().length === 0) {
+      Notification.show('Todos los campos son obligatorios', { duration: 4000, theme: 'error' });
+      return;
     }
+    const rolActualizado: Rol = {
+      ...rol,
+      nombre: nombre.trim(),
+      descripcion: descripcion.trim(),
+      imagen: imagen.trim() || undefined,
+    };
+    onRolUpdated?.(rolActualizado);
+    close();
+    Notification.show('Rol actualizado exitosamente', { duration: 4000, theme: 'success' });
   };
 
-  const deleteRol = async () => {
-    try {
-      if (confirm('¿Está seguro de eliminar este rol?')) {
-        await RolServices.delete(Number(rol.id));
-        onRolUpdated?.();
-        close();
-        Notification.show('Rol eliminado exitosamente', { duration: 4000, theme: 'success' });
-      }
-    } catch (error) {
-      handleError(error);
+  const deleteRol = () => {
+    if (confirm('¿Está seguro de eliminar este rol?')) {
+      onRolUpdated?.(undefined); // Indica eliminación
+      close();
+      Notification.show('Rol eliminado exitosamente', { duration: 4000, theme: 'success' });
     }
   };
 
@@ -156,7 +141,7 @@ function RolEditForm({ rol, onRolUpdated }: RolEditFormProps) {
         modeless
         opened={dialogOpened}
         onOpenedChanged={e => setDialogOpened(e.detail.value)}
-        header={<h2 className="draggable" style={{ fontWeight: 'bold' }}>Editar Rol</h2>}
+        header={<h2 style={{ fontWeight: 'bold' }}>Editar Rol</h2>}
         footerRenderer={() => (
           <>
             <Button onClick={close}>Cancelar</Button>
@@ -192,25 +177,18 @@ function RolEditForm({ rol, onRolUpdated }: RolEditFormProps) {
 }
 
 export default function RolListView() {
-  const [items, setItems] = useState<Rol[]>([]);
-  const [allItems, setAllItems] = useState<Rol[]>([]);
+  const [items, setItems] = useState<Rol[]>([
+    // Datos iniciales de ejemplo
+    { id: 1, nombre: 'Administrador', descripcion: 'Acceso total', imagen: '' },
+    { id: 2, nombre: 'Usuario', descripcion: 'Acceso limitado', imagen: '' },
+  ]);
+  const [allItems, setAllItems] = useState<Rol[]>(items);
   const [criterio, setCriterio] = useState('');
   const [texto, setTexto] = useState('');
 
   useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    try {
-      const data = await RolServices.listAll();
-      const filteredData = (data ?? []).filter((item): item is Rol => item !== undefined);
-      setItems(filteredData);
-      setAllItems(filteredData);
-    } catch (error) {
-      handleError(error);
-    }
-  };
+    setAllItems(items);
+  }, [items]);
 
   const itemSelect = [
     { label: 'Nombre', value: 'nombre' },
@@ -253,6 +231,32 @@ export default function RolListView() {
     Notification.show(`Mostrando todos los roles (${allItems.length})`, { duration: 2000, theme: 'success' });
   };
 
+  const onRolCreated = (nuevoRol: Rol) => {
+    setItems(prev => [...prev, nuevoRol]);
+    setAllItems(prev => [...prev, nuevoRol]);
+  };
+
+  const onRolUpdated = (rolActualizado?: Rol) => {
+    if (!rolActualizado) {
+      // Eliminación: eliminar rol con id igual al que se pasó
+      // Para esto, necesitamos que el RolEditForm pase el id al llamar onRolUpdated con undefined
+      // Aquí simplificamos: si rolActualizado es undefined, no hacemos nada
+      return;
+    }
+    setItems(prev => prev.map(r => (r.id === rolActualizado.id ? rolActualizado : r)));
+    setAllItems(prev => prev.map(r => (r.id === rolActualizado.id ? rolActualizado : r)));
+  };
+
+  const onRolDeleted = (rolId: number) => {
+    setItems(prev => prev.filter(r => r.id !== rolId));
+    setAllItems(prev => prev.filter(r => r.id !== rolId));
+  };
+
+  // Modificamos RolEditForm para llamar onRolDeleted en eliminación
+  // Para eso, pasamos onRolDeleted a RolEditForm y llamamos allí
+
+  // Actualizamos renderActions para pasar onRolDeleted
+
   function renderIndex({ model }: { model: any }) {
     return <span>{model.index + 1}</span>;
   }
@@ -268,19 +272,27 @@ export default function RolListView() {
   }
 
   function renderActions({ item }: { item: Rol }) {
-    return <RolEditForm rol={item} onRolUpdated={loadData} />;
+    return (
+      <RolEditForm
+        rol={item}
+        onRolUpdated={updatedRol => {
+          if (updatedRol) {
+            onRolUpdated(updatedRol);
+          } else {
+            onRolDeleted(item.id);
+          }
+        }}
+      />
+    );
   }
 
   return (
     <main className="w-full h-full flex flex-col box-border gap-s p-m" style={{ background: '#f8f8fa' }}>
-      <ViewToolbar title="Gestión de Roles">
-        <Group>
-          <RolEntryForm onRolCreated={loadData} />
-        </Group>
-      </ViewToolbar>
+      <div style={{ paddingBottom: '1rem' }}>
+        <RolEntryForm onRolCreated={onRolCreated} />
+      </div>
 
-      {/* Panel de búsqueda */}
-      <HorizontalLayout theme="spacing">
+      <HorizontalLayout theme="spacing" style={{ marginBottom: '1rem' }}>
         <Select
           items={itemSelect}
           value={criterio}
@@ -306,7 +318,6 @@ export default function RolListView() {
         </Button>
       </HorizontalLayout>
 
-      {/* Grid con datos */}
       <Grid items={items} style={{ background: 'white', borderRadius: 12, boxShadow: '0 2px 8px #0001' }}>
         <GridColumn header="#" renderer={renderIndex} width="60px" />
         <GridColumn header="Imagen" renderer={renderImagen} width="70px" />

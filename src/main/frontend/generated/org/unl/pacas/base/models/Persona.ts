@@ -1,4 +1,5 @@
 import type Cuenta_1 from "./Cuenta.js";
+import type Factura_1 from "./Factura.js";
 import type Sexo_1 from "./Sexo.js";
 import type TipoIdentificacion_1 from "./TipoIdentificacion.js";
 interface Persona {
@@ -13,9 +14,7 @@ interface Persona {
     direccion?: string;
     fechaNacimiento?: string;
     cuenta?: Cuenta_1;
+    facturas?: Array<Factura_1 | undefined>;
     nombreCompleto?: string;
-    identificacionCompleta?: string;
-    edad?: number;
-    displayName?: string;
 }
 export default Persona;

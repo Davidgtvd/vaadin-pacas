@@ -52,7 +52,7 @@ client.middlewares = [...client.middlewares, copilotMiddleware];
 
 import './vaadin-featureflags.js';
 
-import './index';
+import '../index';
 
 import './vaadin-react.js';
 import 'Frontend/generated/jar-resources/vaadin-dev-tools/vaadin-dev-tools.js';

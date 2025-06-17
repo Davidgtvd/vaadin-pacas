@@ -3,34 +3,10 @@
     "route": "",
     "flowLayout": false,
     "params": {},
-<<<<<<< HEAD
-    "title": "Cuenta List"
-  },
-  {
-    "route": "persona-list",
-    "flowLayout": false,
-    "params": {},
-    "title": "Persona List"
-  },
-  {
-    "route": "producto-list",
-    "flowLayout": false,
-    "params": {},
-    "title": "Producto List"
-  },
-  {
-    "route": "rol-list",
-    "flowLayout": false,
-    "params": {},
-    "title": "Rol List"
-=======
     "title": "Main Layout",
     "children": [
       {
         "route": "",
-        "menu": {
-          "exclude": true
-        },
         "flowLayout": false,
         "params": {},
         "title": "Main"
@@ -42,10 +18,22 @@
         "title": "App"
       },
       {
+        "route": "compra-list",
+        "flowLayout": false,
+        "params": {},
+        "title": "Compra List"
+      },
+      {
         "route": "cuenta-list",
         "flowLayout": false,
         "params": {},
-        "title": "Cuenta List"
+        "title": "Compra List"
+      },
+      {
+        "route": "Factura-list",
+        "flowLayout": false,
+        "params": {},
+        "title": "Factura List"
       },
       {
         "route": "Login",
@@ -60,10 +48,22 @@
         "title": "Pagina Principal"
       },
       {
+        "route": "pagosviews",
+        "flowLayout": false,
+        "params": {},
+        "title": "Pago List"
+      },
+      {
         "route": "persona-list",
         "flowLayout": false,
         "params": {},
         "title": "Persona List"
+      },
+      {
+        "route": "porducto-list",
+        "flowLayout": false,
+        "params": {},
+        "title": "Producto List"
       },
       {
         "route": "Registro",
@@ -82,8 +82,13 @@
         "flowLayout": false,
         "params": {},
         "title": "Rol List"
+      },
+      {
+        "route": "task-list",
+        "flowLayout": false,
+        "params": {},
+        "title": "Task List"
       }
     ]
->>>>>>> 6884a960 (Cambios locales de David antes de sincronizar)
   }
 ]

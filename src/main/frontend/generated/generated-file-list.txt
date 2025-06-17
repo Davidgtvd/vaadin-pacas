@@ -6,6 +6,11 @@ org/unl/pacas/base/models/Persona.ts
 org/unl/pacas/base/models/Rol.ts
 org/unl/pacas/base/models/TipoIdentificacion.ts
 org/unl/pacas/base/models/Sexo.ts
+org/unl/pacas/base/models/Factura.ts
+org/unl/pacas/base/models/DetalleFactura.ts
+org/unl/pacas/base/models/Producto.ts
+org/unl/pacas/base/models/Compra.ts
+org/unl/pacas/base/models/Pago.ts
 connect-client.default.ts
 endpoints.ts
 org/unl/pacas/base/models/CuentaModel.ts
@@ -13,3 +18,8 @@ org/unl/pacas/base/models/PersonaModel.ts
 org/unl/pacas/base/models/RolModel.ts
 org/unl/pacas/base/models/TipoIdentificacionModel.ts
 org/unl/pacas/base/models/SexoModel.ts
+org/unl/pacas/base/models/FacturaModel.ts
+org/unl/pacas/base/models/DetalleFacturaModel.ts
+org/unl/pacas/base/models/ProductoModel.ts
+org/unl/pacas/base/models/CompraModel.ts
+org/unl/pacas/base/models/PagoModel.ts

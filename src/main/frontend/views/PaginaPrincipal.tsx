@@ -34,7 +34,7 @@ const PaginaPrincipal: React.FC = () => {
 
       <main>
         <h2>Productos Destacados</h2>
-        {/* Aquí puedes agregar la lista o galería de productos */}
+        {/* Aquí puedes agregar la lista o galería de productos local */}
       </main>
 
       <Dialog
