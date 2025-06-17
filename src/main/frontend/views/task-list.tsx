@@ -1,0 +1,79 @@
+import { ViewConfig } from '@vaadin/hilla-file-router/types.js';
+import { Button, DatePicker, Grid, GridColumn, TextField } from '@vaadin/react-components';
+import { Notification } from '@vaadin/react-components/Notification';
+import { useSignal } from '@vaadin/hilla-react-signals';
+import handleError from 'Frontend/views/_ErrorHandler';
+import { Group, ViewToolbar } from 'Frontend/components/ViewToolbar';
+import { useDataProvider } from '@vaadin/hilla-react-crud';
+
+
+
+export const config: ViewConfig = {
+  title: 'Task List',
+  menu: {
+    icon: 'vaadin:clipboard-check',
+    order: 1,
+    title: 'Task List',
+  },
+};
+
+const dateTimeFormatter = new Intl.DateTimeFormat(undefined, {
+  dateStyle: 'medium',
+  timeStyle: 'medium',
+});
+
+const dateFormatter = new Intl.DateTimeFormat(undefined, {
+  dateStyle: 'medium',
+});
+
+type TaskEntryFormProps = {
+  onTaskCreated?: () => void;
+};
+
+function TaskEntryForm(props: TaskEntryFormProps) {
+  const description = useSignal('');
+  const dueDate = useSignal<string | undefined>('');
+  const createTask = async () => {
+    try {
+      if (
+        description.value.trim().length > 0 &&
+        dueDate.value !== undefined &&
+        dueDate.value.trim().length > 0
+      ) {
+        
+        description.value = '';
+        dueDate.value = undefined;
+        Notification.show('Task added', { duration: 3000, position: 'bottom-end', theme: 'success' });
+      } else {
+        Notification.show('No se pudo crear, faltan datos', { duration: 3000, position: 'top-center', theme: 'error' });
+      }
+
+    } catch (error) {
+      console.log(error);
+      handleError(error);
+    }
+  };
+  return (
+    <>
+      <TextField
+        placeholder="What do you want to do?"
+        aria-label="Task description"
+        maxlength={255}
+        style={{ minWidth: '20em' }}
+        value={description.value}
+        onValueChanged={(evt) => (description.value = evt.detail.value)}
+      />
+      <DatePicker
+
+        placeholder="Due date"
+        aria-label="Due date"
+        value={dueDate.value}
+        onValueChanged={(evt) => (dueDate.value = evt.detail.value)}
+      />
+      <Button onClick={createTask} theme="primary">
+        Create
+      </Button>
+    </>
+  );
+}
+

@@ -11,13 +11,13 @@ import {
   VerticalLayout,
 } from '@vaadin/react-components';
 import { Notification } from '@vaadin/react-components/Notification';
-import RolServices from 'Frontend/generated/RolServices';
+import * as RolServices from 'Frontend/generated/RolServices';
 import handleError from 'Frontend/views/_ErrorHandler';
 import { Group, ViewToolbar } from 'Frontend/components/ViewToolbar';
 import { useEffect, useState } from 'react';
 
 type Rol = {
-  id: string;
+  id: number;
   nombre: string;
   descripcion: string;
   imagen?: string; // URL o base64 para mostrar ícono/imagen
@@ -45,7 +45,7 @@ function RolEntryForm({ onRolCreated }: RolEntryFormProps) {
   const createRol = async () => {
     try {
       if (nombre.trim().length > 0 && descripcion.trim().length > 0) {
-        await RolServices.create(nombre.trim(), descripcion.trim(), imagen.trim());
+        await RolServices.create(nombre.trim(), descripcion.trim());
         onRolCreated?.();
         close();
         Notification.show('Rol creado exitosamente', { duration: 4000, theme: 'success' });
@@ -123,7 +123,7 @@ function RolEditForm({ rol, onRolUpdated }: RolEditFormProps) {
   const updateRol = async () => {
     try {
       if (nombre.trim().length > 0 && descripcion.trim().length > 0) {
-        await RolServices.update(rol.id, nombre.trim(), descripcion.trim(), imagen.trim());
+        await RolServices.update(Number(rol.id), nombre.trim(), descripcion.trim());
         onRolUpdated?.();
         close();
         Notification.show('Rol actualizado exitosamente', { duration: 4000, theme: 'success' });
@@ -138,7 +138,7 @@ function RolEditForm({ rol, onRolUpdated }: RolEditFormProps) {
   const deleteRol = async () => {
     try {
       if (confirm('¿Está seguro de eliminar este rol?')) {
-        await RolServices.delete(rol.id);
+        await RolServices.delete(Number(rol.id));
         onRolUpdated?.();
         close();
         Notification.show('Rol eliminado exitosamente', { duration: 4000, theme: 'success' });
@@ -204,8 +204,9 @@ export default function RolListView() {
   const loadData = async () => {
     try {
       const data = await RolServices.listAll();
-      setItems(data ?? []);
-      setAllItems(data ?? []);
+      const filteredData = (data ?? []).filter((item): item is Rol => item !== undefined);
+      setItems(filteredData);
+      setAllItems(filteredData);
     } catch (error) {
       handleError(error);
     }
