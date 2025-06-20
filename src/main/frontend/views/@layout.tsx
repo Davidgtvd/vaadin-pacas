@@ -1,24 +1,27 @@
 import { Outlet, useLocation, useNavigate } from 'react-router';
+import '@vaadin/icons';
 import {
   AppLayout,
   Avatar,
   Icon,
   MenuBar,
+  MenuBarItem,
   MenuBarItemSelectedEvent,
   ProgressBar,
   Scroller,
   SideNav,
   SideNavItem,
 } from '@vaadin/react-components';
-import { Suspense } from 'react';
+import { Suspense, useMemo } from 'react';
 import { createMenuItems } from '@vaadin/hilla-file-router/runtime.js';
+import { useAuth } from 'Frontend/security/auth';
 
 function Header() {
   // TODO Replace with real application logo and name
   return (
     <div className="flex p-m gap-m items-center" slot="drawer">
       <Icon icon="vaadin:cubes" className="text-primary icon-l" />
-      <span className="font-semibold text-l">Unl Pacas</span>
+      <span className="font-semibold text-l">Pacas</span>
     </div>
   );
 }
@@ -39,27 +42,45 @@ function MainMenu() {
   );
 }
 
+type UserMenuItem = MenuBarItem<{ action?: () => void | Promise<void> }>;
+
 function UserMenu() {
-  // TODO Replace with real user information and actions
-  const items = [
+  const { logout, state } = useAuth();
+
+  const fullName = state.user?.fullName;
+  const pictureUrl = state.user?.pictureUrl;
+  const profileUrl = state.user?.profileUrl;
+
+  const children: Array<UserMenuItem> = useMemo(() => {
+    const items: Array<UserMenuItem> = [];
+    if (profileUrl) {
+      items.push({ text: 'View Profile', action: () => window.open(profileUrl, 'blank')?.focus() });
+    }
+    // TODO Add additional items to the user menu if needed
+    items.push({ text: 'Logout', action: logout });
+    return items;
+  }, [profileUrl, logout]);
+
+  if (!state.user) {
+    return (
+      <span {...{ theme: 'badge error' }} slot="drawer">
+        Not logged in
+      </span>
+    );
+  }
+
+  const items: Array<UserMenuItem> = [
     {
       component: (
         <>
-          <Avatar theme="xsmall" name="John Smith" colorIndex={5} className="mr-s" /> Monkey D. Luffy
+          <Avatar theme="xsmall" img={pictureUrl} name={fullName} colorIndex={5} className="mr-s" /> {fullName}
         </>
       ),
-      children: [
-        { text: 'View Profile', action: () => console.log('View Profile') },
-        { text: 'Manage Settings', action: () => console.log('Manage Settings') },
-        { text: 'Logout', action: () => console.log('Logout') },
-      ],
+      children: children,
     },
   ];
-  const onItemSelected = (event: MenuBarItemSelectedEvent) => {
-    const action = (event.detail.value as any).action;
-    if (action) {
-      action();
-    }
+  const onItemSelected = (event: MenuBarItemSelectedEvent<UserMenuItem>) => {
+    event.detail.value.action?.();
   };
   return (
     <MenuBar theme="tertiary-inline" items={items} onItemSelected={onItemSelected} className="m-m" slot="drawer" />

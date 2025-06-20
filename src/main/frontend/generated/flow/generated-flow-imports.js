@@ -1,3 +1,7 @@
+import { injectGlobalCss } from 'Frontend/generated/jar-resources/theme-util.js';
+
+import { css, unsafeCSS, registerStyles } from '@vaadin/vaadin-themable-mixin';
+import $cssFromFile_0 from 'Frontend/themes/default/dev-login.css?inline';
 import '@vaadin/field-highlighter/theme/lumo/vaadin-field-highlighter.js';
 import '@vaadin/common-frontend/ConnectionIndicator.js';
 import '@vaadin/polymer-legacy-adapter/style-modules.js';
@@ -11,6 +15,7 @@ import '@vaadin/avatar/theme/lumo/vaadin-avatar.js';
 import '@vaadin/avatar-group/theme/lumo/vaadin-avatar-group.js';
 import '@vaadin/board/theme/lumo/vaadin-board.js';
 import '@vaadin/board/theme/lumo/vaadin-board-row.js';
+import '@vaadin/card/theme/lumo/vaadin-card.js';
 import '@vaadin/charts/theme/lumo/vaadin-chart.js';
 import '@vaadin/checkbox/theme/lumo/vaadin-checkbox.js';
 import '@vaadin/checkbox-group/theme/lumo/vaadin-checkbox-group.js';
@@ -32,6 +37,7 @@ import '@vaadin/grid/theme/lumo/vaadin-grid-sorter.js';
 import 'Frontend/generated/jar-resources/gridConnector.ts';
 import '@vaadin/tooltip/theme/lumo/vaadin-tooltip.js';
 import '@vaadin/custom-field/theme/lumo/vaadin-custom-field.js';
+import '@vaadin/dashboard/theme/lumo/vaadin-dashboard.js';
 import '@vaadin/dashboard/theme/lumo/vaadin-dashboard-section.js';
 import '@vaadin/dashboard/theme/lumo/vaadin-dashboard-widget.js';
 import '@vaadin/date-picker/theme/lumo/vaadin-date-picker.js';
@@ -43,6 +49,7 @@ import '@vaadin/dialog/theme/lumo/vaadin-dialog.js';
 import 'Frontend/generated/jar-resources/dndConnector.js';
 import '@vaadin/form-layout/theme/lumo/vaadin-form-layout.js';
 import '@vaadin/form-layout/theme/lumo/vaadin-form-item.js';
+import '@vaadin/form-layout/theme/lumo/vaadin-form-row.js';
 import '@vaadin/grid/theme/lumo/vaadin-grid-column-group.js';
 import 'Frontend/generated/jar-resources/vaadin-grid-flow-selection-column.js';
 import '@vaadin/grid-pro/theme/lumo/vaadin-grid-pro.js';
@@ -56,6 +63,7 @@ import '@vaadin/login/theme/lumo/vaadin-login-form.js';
 import '@vaadin/login/theme/lumo/vaadin-login-overlay.js';
 import '@vaadin/map/theme/lumo/vaadin-map.js';
 import 'Frontend/generated/jar-resources/vaadin-map/mapConnector.js';
+import '@vaadin/markdown/theme/lumo/vaadin-markdown.js';
 import 'Frontend/generated/jar-resources/menubarConnector.js';
 import '@vaadin/menu-bar/theme/lumo/vaadin-menu-bar.js';
 import '@vaadin/message-input/theme/lumo/vaadin-message-input.js';
@@ -100,6 +108,8 @@ import '@vaadin/vaadin-lumo-styles/sizing.js';
 import '@vaadin/vaadin-lumo-styles/spacing.js';
 import '@vaadin/vaadin-lumo-styles/style.js';
 import '@vaadin/vaadin-lumo-styles/vaadin-iconset.js';
+
+injectGlobalCss($cssFromFile_0.toString(), 'CSSImport end', document);
 const loadOnDemand = (key) => { return Promise.resolve(0); }
 window.Vaadin = window.Vaadin || {};
 window.Vaadin.Flow = window.Vaadin.Flow || {};

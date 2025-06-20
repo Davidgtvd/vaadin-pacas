@@ -3,27 +3,6 @@
     "route": "",
     "flowLayout": false,
     "params": {},
-<<<<<<< HEAD
-    "title": "Cuenta List"
-  },
-  {
-    "route": "persona-list",
-    "flowLayout": false,
-    "params": {},
-    "title": "Persona List"
-  },
-  {
-    "route": "producto-list",
-    "flowLayout": false,
-    "params": {},
-    "title": "Producto List"
-  },
-  {
-    "route": "rol-list",
-    "flowLayout": false,
-    "params": {},
-    "title": "Rol List"
-=======
     "title": "Main Layout",
     "children": [
       {
@@ -36,54 +15,27 @@
         "title": "Main"
       },
       {
-        "route": "App",
+        "route": "pacas",
+        "title": "Compra",
+        "menu": {
+          "icon": "vaadin:package",
+          "order": 1,
+          "title": "Compra"
+        },
         "flowLayout": false,
-        "params": {},
-        "title": "App"
+        "params": {}
       },
       {
-        "route": "cuenta-list",
+        "route": "task-list",
+        "title": "Task List",
+        "menu": {
+          "icon": "vaadin:clipboard-check",
+          "order": 1,
+          "title": "Task List"
+        },
         "flowLayout": false,
-        "params": {},
-        "title": "Cuenta List"
-      },
-      {
-        "route": "Login",
-        "flowLayout": false,
-        "params": {},
-        "title": "Login"
-      },
-      {
-        "route": "PaginaPrincipal",
-        "flowLayout": false,
-        "params": {},
-        "title": "Pagina Principal"
-      },
-      {
-        "route": "persona-list",
-        "flowLayout": false,
-        "params": {},
-        "title": "Persona List"
-      },
-      {
-        "route": "Registro",
-        "flowLayout": false,
-        "params": {},
-        "title": "Registro"
-      },
-      {
-        "route": "registro-list",
-        "flowLayout": false,
-        "params": {},
-        "title": "Registro List"
-      },
-      {
-        "route": "rol-list",
-        "flowLayout": false,
-        "params": {},
-        "title": "Rol List"
+        "params": {}
       }
     ]
->>>>>>> 6884a960 (Cambios locales de David antes de sincronizar)
   }
 ]

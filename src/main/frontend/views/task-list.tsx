@@ -1,12 +1,12 @@
 import { ViewConfig } from '@vaadin/hilla-file-router/types.js';
 import { Button, DatePicker, Grid, GridColumn, TextField } from '@vaadin/react-components';
 import { Notification } from '@vaadin/react-components/Notification';
+import { TaskService } from 'Frontend/generated/endpoints';
 import { useSignal } from '@vaadin/hilla-react-signals';
 import handleError from 'Frontend/views/_ErrorHandler';
 import { Group, ViewToolbar } from 'Frontend/components/ViewToolbar';
+import Task from 'Frontend/generated/org/unl/pacas/taskmanagement/domain/Task';
 import { useDataProvider } from '@vaadin/hilla-react-crud';
-
-
 
 export const config: ViewConfig = {
   title: 'Task List',
@@ -14,7 +14,7 @@ export const config: ViewConfig = {
     icon: 'vaadin:clipboard-check',
     order: 1,
     title: 'Task List',
-  },
+  }
 };
 
 const dateTimeFormatter = new Intl.DateTimeFormat(undefined, {
@@ -35,21 +35,14 @@ function TaskEntryForm(props: TaskEntryFormProps) {
   const dueDate = useSignal<string | undefined>('');
   const createTask = async () => {
     try {
-      if (
-        description.value.trim().length > 0 &&
-        dueDate.value !== undefined &&
-        dueDate.value.trim().length > 0
-      ) {
-        
-        description.value = '';
-        dueDate.value = undefined;
-        Notification.show('Task added', { duration: 3000, position: 'bottom-end', theme: 'success' });
-      } else {
-        Notification.show('No se pudo crear, faltan datos', { duration: 3000, position: 'top-center', theme: 'error' });
+      await TaskService.createTask(description.value, dueDate.value);
+      if (props.onTaskCreated) {
+        props.onTaskCreated();
       }
-
+      description.value = '';
+      dueDate.value = undefined;
+      Notification.show('Task added', { duration: 3000, position: 'bottom-end', theme: 'success' });
     } catch (error) {
-      console.log(error);
       handleError(error);
     }
   };
@@ -64,7 +57,6 @@ function TaskEntryForm(props: TaskEntryFormProps) {
         onValueChanged={(evt) => (description.value = evt.detail.value)}
       />
       <DatePicker
-
         placeholder="Due date"
         aria-label="Due date"
         value={dueDate.value}
@@ -77,3 +69,27 @@ function TaskEntryForm(props: TaskEntryFormProps) {
   );
 }
 
+export default function TaskListView() {
+  const dataProvider = useDataProvider<Task>({
+    list: (pageable) => TaskService.list(pageable),
+  });
+
+  return (
+    <main className="w-full h-full flex flex-col box-border gap-s p-m">
+      <ViewToolbar title="Task List">
+        <Group>
+          <TaskEntryForm onTaskCreated={dataProvider.refresh} />
+        </Group>
+      </ViewToolbar>
+      <Grid dataProvider={dataProvider.dataProvider}>
+        <GridColumn path="description" />
+        <GridColumn path="dueDate" header="Due Date">
+          {({ item }) => (item.dueDate ? dateFormatter.format(new Date(item.dueDate)) : 'Never')}
+        </GridColumn>
+        <GridColumn path="creationDate" header="Creation Date">
+          {({ item }) => dateTimeFormatter.format(new Date(item.creationDate))}
+        </GridColumn>
+      </Grid>
+    </main>
+  );
+}

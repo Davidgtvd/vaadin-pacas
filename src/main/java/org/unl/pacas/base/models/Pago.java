@@ -1,23 +1,41 @@
 package org.unl.pacas.base.models;
-import java.time.LocalDateTime;
-
 
 public class Pago {
-    private Long id;
-    private String codigoSeguridad;
-    private MetodoPago metodoPago;
+    private int id;
+    private String codigo_seguridad;
+    private MetodoPagoEnum metodoPago;
     private Boolean estado;
-    private LocalDateTime fechaPago;
+
+    public int getId() {
+        return this.id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getCodigo_seguridad() {
+        return this.codigo_seguridad;
+    }
+
+    public void setCodigo_seguridad(String codigo_seguridad) {
+        this.codigo_seguridad = codigo_seguridad;
+    }
+
+    public MetodoPagoEnum getMetodoPago() {
+        return this.metodoPago;
+    }
+
+    public void setMetodoPago(MetodoPagoEnum metodoPago) {
+        this.metodoPago = metodoPago;
+    }
+
+    public Boolean getEstado() {
+        return this.estado;
+    }
+
+    public void setEstado(Boolean estado) {
+        this.estado = estado;
+    }
     
-    // Getters y Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getCodigoSeguridad() { return codigoSeguridad; }
-    public void setCodigoSeguridad(String codigoSeguridad) { this.codigoSeguridad = codigoSeguridad; }
-    public MetodoPago getMetodoPago() { return metodoPago; }
-    public void setMetodoPago(MetodoPago metodoPago) { this.metodoPago = metodoPago; }
-    public Boolean getEstado() { return estado; }
-    public void setEstado(Boolean estado) { this.estado = estado; }
-    public LocalDateTime getFechaPago() { return fechaPago; }
-    public void setFechaPago(LocalDateTime fechaPago) { this.fechaPago = fechaPago; }
 }
